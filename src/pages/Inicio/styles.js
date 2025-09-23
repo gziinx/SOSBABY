@@ -19,10 +19,23 @@ export const Card = styled.div`
     text-align: center;
     flex-direction: column;
     align-items: center;
-    margin-right: 50px;
+    margin-right: 70px;
 `
 export const Textin = styled.h2`
     font-size: 58px;
     margin-bottom: 30px;
     color: #000;
 `
+
+export const Casa = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+`
+export const Logo = styled.img`
+    width: 850px;
+    height: 800px;
+    margin-top: 65px;
+    `
+

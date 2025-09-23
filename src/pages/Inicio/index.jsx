@@ -1,6 +1,8 @@
-import { Ola, Card, Textin } from "./styles"
+import { Ola, Card, Textin, Casa, Logo } from "./styles"
 import Buttu from "../../components/input1"
-import GlobalStyle  from "../../styles/GglobalStyles"
+import { GlobalStyle, CadStyle } from "../../styles/GglobalStyles"
+import foto from "../../assets/logoo.png";
+import { Link } from "react-router-dom";
 
 function Inicio (){
 
@@ -8,10 +10,15 @@ function Inicio (){
     return(
         <Ola>
                 <GlobalStyle/>
-                <h1>ola</h1>
+                <Casa>
+                        <Logo src= {foto} alt="Ali" />
+                </Casa>
                 <Card>
                 <Textin>BEM VINDO!</Textin>
+                <Link to="/cadastro">
                 <Buttu>CRIAR CONTA</Buttu>
+                </Link>
+
                 <Buttu>ENTRAR</Buttu>
                 </Card>
                 
