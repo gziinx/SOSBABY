@@ -1,4 +1,4 @@
-import { Brekman, Escreva, Label } from "./styles";
+import { Brekman, Escreva, Label } from "./style";
 
 function InputWhite({ label, value, onChange, placeholder, type = "text", as = "input", options = [] }) {
   return (

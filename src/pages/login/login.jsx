@@ -9,10 +9,10 @@ function Login() {
   const [senha, setSenha] = useState("");
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    e.preventDefault()
 
     try {
-      const response = await fetch("http://localhost:3030/v1/sosbaby/login", {
+      const response = await fetch("http://localhost:3030/v1/sosbaby/user/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -29,8 +29,8 @@ function Login() {
         // salvar usuário no localStorage
         localStorage.setItem("usuario", JSON.stringify(data));
 
-        // redireciona para home
-        window.location.href = "/";
+        
+        window.location.href = "/cadrespon";
       } else {
         const errorData = await response.json();
         console.error(errorData);
@@ -55,7 +55,7 @@ function Login() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
-
+        
         <Inputzada
           type="password"
           placeholder="SENHA"
