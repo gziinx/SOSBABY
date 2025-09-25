@@ -1,6 +1,6 @@
-import {Bore, Titu, Linha, Butao, Fundula} from "./style"
+import { Bore, Titu, Linha, Butao, Fundula } from "./style"
 import Inputzada from "../../components/inputzada"
-import {GlobalStyle, CadStyle } from "../../styles/GglobalStyles"
+import { GlobalStyle, CadStyle } from "../../styles/GglobalStyles"
 import footinha from "../../assets/funduu.png"
 import { useState } from "react";
 
@@ -12,7 +12,7 @@ function Cadastro() {
   const [confirmSenha, setConfirmSenha] = useState("");
 
   const handleSubmit = async (e) => {
-    e.preventDefault(); // evita recarregar a página
+    e.preventDefault();
 
     if (senha !== confirmSenha) {
       alert("As senhas são diferentes.");
@@ -20,7 +20,7 @@ function Cadastro() {
     }
 
     try {
-      const userResponse = await fetch("http://localhost:3030/v1/user", {
+      const userResponse = await fetch("http://localhost:3030/v1/sosbaby/user/cadastro", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -44,11 +44,13 @@ function Cadastro() {
       alert("Erro no processo de cadastro.");
     }
   };
-    return(
-        <Bore>
-            <CadStyle/>
-            <Titu>Cadastrar-se</Titu>
-            <Inputzada
+  return (
+    <Bore>
+      <CadStyle />
+      <Titu>Cadastrar-se</Titu>
+
+      <form onSubmit={handleSubmit}>
+      <Inputzada
         type="email"
         placeholder="EMAIL"
         icon="@"
@@ -71,11 +73,11 @@ function Cadastro() {
         value={confirmSenha}
         onChange={(e) => setConfirmSenha(e.target.value)}
       />
-      <Linha/>
+      <Linha />
       <Butao type="submit">CADASTRAR</Butao>
-      <Fundula src={footinha} alt=""/>
-        </Bore>
-    ) 
-  }
-  export default Cadastro
-  
+      <Fundula src={footinha} alt="" />
+      </form>
+    </Bore>
+  )
+}
+export default Cadastro

@@ -18,8 +18,9 @@ function Inicio (){
                 <Link to="/cadastro">
                 <Buttu>CRIAR CONTA</Buttu>
                 </Link>
-
+                <Link to="/login">
                 <Buttu>ENTRAR</Buttu>
+                </Link>
                 </Card>
                 
         </Ola>
