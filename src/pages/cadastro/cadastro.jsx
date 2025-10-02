@@ -3,6 +3,7 @@ import Inputzada from "../../components/inputzada"
 import { GlobalStyle, CadStyle } from "../../styles/GglobalStyles"
 import footinha from "../../assets/funduu.png"
 import { useState } from "react";
+import React from "react";
 
 
 
