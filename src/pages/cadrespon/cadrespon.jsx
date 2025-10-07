@@ -17,7 +17,7 @@ import {
 import { CadoisStyle } from "../../styles/GglobalStyles";
 import foto from "../../assets/logu.png";
 
-function CadastroBebe() {
+function CadastroRespon() {
   const [nome, setNome] = useState("");
   const [data_nascimento, setDataNascimento] = useState("");
   const [cpf, setCpf] = useState("");
@@ -25,13 +25,14 @@ function CadastroBebe() {
   const [cartao_medico, setCartao] = useState("");
   const [cep, setCep] = useState("");
   const [segundoResponsavel, setSegundoResponsavel] = useState(false);
-  const [arquivoBase64, setArquivoBase64] = useState(""); // imagem em base64
-
+  const [arquivoBase64, setArquivoBase64] = useState(""); 
+  const [arquivo, setArquivo] = useState(null);
   // Redimensiona e comprime a imagem antes de enviar
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
+    setArquivo(file);
     const reader = new FileReader();
     reader.onload = (event) => {
       let img = new Image();
@@ -39,7 +40,7 @@ function CadastroBebe() {
 
       img.onload = () => {
         const canvas = document.createElement("canvas");
-        const maxWidth = 500; // largura máxima
+        const maxWidth = 500; 
         const scaleSize = maxWidth / img.width;
         canvas.width = maxWidth;
         canvas.height = img.height * scaleSize;
@@ -57,38 +58,48 @@ function CadastroBebe() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
+    // Garante que o usuário selecionou uma imagem
+    if (!arquivoBase64) {
+      alert("Selecione uma imagem antes de enviar.");
+      return;
+    }
+  
+    const dados = {
+      nome: nome,
+      data_nascimento: data_nascimento,
+      cpf: cpf,
+      telefone: telefone,
+      cartao_medico: cartao_medico, // 👈 nome certo
+      cep: cep,
+      arquivo: arquivo.name,       // 👈 base64 da imagem
+      id_sexo: 1,
+      id_user: 1
+    };
+  
     try {
       const response = await fetch("http://localhost:3030/v1/sosbaby/resp/cadastro", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          nome,
-          data_nascimento,
-          cpf,
-          telefone,
-          cartao_medico,
-          cep,
-          segundo_responsavel: segundoResponsavel,
-          arquivo: arquivoBase64,
-          id_sexo: 1,
-          id_user: 1
-        }),
+        body: JSON.stringify(dados),
       });
-
+  
+      const data = await response.json();
+  
       if (response.ok) {
         alert("Cadastro do bebê realizado com sucesso!");
-        window.location.href = "/login";
+        console.log(data);
       } else {
-        const errorData = await response.json();
-        console.error(errorData);
-        alert("Erro ao cadastrar bebê.");
+        console.error(data);
+        alert(data.message || "Erro ao cadastrar bebê.");
       }
     } catch (error) {
       console.error(error);
       alert("Erro no processo de cadastro.");
     }
   };
+  
+  
 
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
@@ -102,7 +113,7 @@ function CadastroBebe() {
       <Formm id="cad" onSubmit={handleSubmit}>
         {/* Identificação */}
         <Section>
-          <Identificacao icon="❤">Identificação</Identificacao>
+          <Identificacao icon="❤">RESPONSAVEL</Identificacao>
           <InputGroup>
             <label htmlFor="nome">Nome completo *</label>
             <Input
@@ -216,4 +227,4 @@ function CadastroBebe() {
   );
 }
 
-export default CadastroBebe;
+export default CadastroRespon;
