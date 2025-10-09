@@ -5,6 +5,7 @@ export const Bore = styled.div`
     border: 1px solid #8AA9FF;
     border-radius: 40px;
     padding: 40px;
+    margin-top: 40px;
     width: 822px;
     height: auto;
     box-shadow: 0 4px 10px rgba(0,0,0,0.2);
@@ -45,6 +46,6 @@ export const Fundula = styled.img`
         position: absolute;
         top: 0px;
         left: 0px;
-        height: auto;
+        height: 100vh;
          z-index: -9999;
 `

@@ -25,7 +25,7 @@ export const CadStyle = createGlobalStyle`
     }
     body {
     background-image: url("../../src/assets/fund.png");
-      height: 100vh;
+      height: auto;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -45,4 +45,18 @@ export const CadoisStyle = createGlobalStyle`
     align-items: center;
   }
 `
+export const CalendarioGlobal = createGlobalStyle`
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Krona One', sans-serif;
+  }
+
+  body {
+    background-color: white;
+    font-family: 'Krona One', sans-serif;
+    display: block;
+  }
+`;
 
