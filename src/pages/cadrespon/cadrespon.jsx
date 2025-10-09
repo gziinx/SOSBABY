@@ -104,6 +104,7 @@ function CadastroRespon() {
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
       <CadoisStyle />
+
       <Logo>
         <LogoImg src={foto} alt="Logo" />
       </Logo>
