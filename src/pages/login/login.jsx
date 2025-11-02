@@ -1,75 +1,147 @@
-import { useState } from "react";
-import { Bore, Titu, Linha, Butao, Fundula } from "./style";
-import Inputzada from "../../components/inputzada";
-import { CadStyle } from "../../styles/GglobalStyles";
-import footinha from "../../assets/funduu.png";
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import './Login.css';
+import emailIcon from '../../assets/email.png';
+import lockIcon from '../../assets/Lock.png';
+import eyeIcon from '../../assets/Eye.png';
+import closedEyeIcon from '../../assets/Closed Eye.png';
 
 function Login() {
-  const [email, setEmail] = useState("");
-  const [senha, setSenha] = useState("");
+  const navigate = useNavigate();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [isEntering, setIsEntering] = useState(true);
+  const [showContent, setShowContent] = useState(false);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
+  useState(() => {
+    // Primeiro desliza o azul para a posição
+    setTimeout(() => setIsEntering(false), 50);
+    // Depois mostra o conteúdo
+    setTimeout(() => setShowContent(true), 800);
+  }, []);
 
-    try {
-      const response = await fetch("http://localhost:3030/v1/sosbaby/user/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: email,
-          senha: senha,
-        }),
-      });
+  const handleGoogleLogin = () => {
+    // Simulação de login com Google
+    alert('Login com Google em desenvolvimento');
+  };
 
-      if (response.ok) {
-        const data = await response.json();
-        alert("Login realizado com sucesso!");
-        console.log("Dados recebidos:", data);
-
-        // salvar usuário no localStorage
-        localStorage.setItem("usuario", JSON.stringify(data));
-
-        
-        window.location.href = "/cadrespon";
-      } else {
-        const errorData = await response.json();
-        console.error(errorData);
-        alert("Erro ao fazer login.");
-      }
-    } catch (error) {
-      console.error(error);
-      alert("Erro no processo de login.");
+  const handleLogin = (e) => {
+    e.preventDefault();
+    // Simulação de login bem-sucedido
+    if (email && password) {
+      // Criar notificação de sucesso
+      const notification = document.createElement('div');
+      notification.className = 'notification success';
+      notification.textContent = 'Login realizado com sucesso!';
+      document.body.appendChild(notification);
+      
+      setTimeout(() => {
+        notification.classList.add('show');
+      }, 10);
+      
+      setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => {
+          notification.remove();
+        }, 300);
+      }, 3000);
+    } else {
+      alert('Por favor, preencha todos os campos');
     }
   };
 
+  const handleForgotPassword = () => {
+    navigate('/recuperar-senha');
+  };
+
+  const handleSignup = () => {
+    setIsTransitioning(true);
+    // Força o reflow para garantir que a animação seja suave
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          navigate('/cadastro');
+        }, 1200);
+      });
+    });
+  };
+
   return (
-    <Bore>
-      <CadStyle />
-      <Titu>Login</Titu>
-
-      <form onSubmit={handleSubmit}>
-        <Inputzada
-          type="email"
-          placeholder="EMAIL"
-          icon="@"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
+    <div className={`login-container ${isTransitioning ? 'transitioning' : ''}`}>
+      <div className={`login-left ${isTransitioning ? 'slide-out-left' : ''} ${isEntering ? 'entering-left' : ''} ${showContent ? 'show-content' : ''}`}>
+        <h1 className="login-title">Entrar com</h1>
         
-        <Inputzada
-          type="password"
-          placeholder="SENHA"
-          icon="🔒"
-          value={senha}
-          onChange={(e) => setSenha(e.target.value)}
-        />
+        <button className="google-btn" onClick={handleGoogleLogin}>
+          <svg className="google-icon" viewBox="0 0 24 24">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+          </svg>
+          Continue com o Google
+        </button>
 
-        <Linha />
-        <Butao type="submit">ENTRAR</Butao>
-        <Fundula src={footinha} alt="" />
-      </form>
-    </Bore>
-  )
+        <div className="divider">
+          <span>Ou use seu email para login</span>
+        </div>
+
+        <form onSubmit={handleLogin} className="login-form">
+          <div className="input-group">
+            <img src={emailIcon} alt="Email" className="input-icon-img" />
+            <input
+              type="email"
+              placeholder="EMAIL"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="login-input"
+            />
+          </div>
+
+          <div className="input-group">
+            <img src={lockIcon} alt="Lock" className="input-icon-img" />
+            <input
+              type={showPassword ? 'text' : 'password'}
+              placeholder="SENHA"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="login-input"
+            />
+            <button
+              type="button"
+              className="toggle-password"
+              onClick={() => setShowPassword(!showPassword)}
+            >
+              <img 
+                src={showPassword ? eyeIcon : closedEyeIcon} 
+                alt="Toggle password visibility" 
+                className={showPassword ? "eye-icon" : "eye-icon closed-eye"}
+              />
+            </button>
+          </div>
+
+          <a className="forgot-password" onClick={handleForgotPassword}>
+            Esqueceu sua senha?
+          </a>
+
+          <button type="submit" className="login-btn">
+            LOGAR
+          </button>
+        </form>
+      </div>
+
+      <div className={`login-right ${isTransitioning ? 'slide-full' : ''} ${isEntering ? 'entering-from-left' : ''}`}>
+        <div className={`right-content ${showContent ? 'show-content' : ''}`}>
+          <h2 className="welcome-text">Olá Usuario !!</h2>
+          <p className="welcome-subtitle">Cadastre-se e comece a usar nossa plataforma</p>
+          <button className="signup-btn" onClick={handleSignup}>
+            Cadastre-se
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 }
 
-export default Login
+export default Login;
