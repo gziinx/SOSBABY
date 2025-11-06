@@ -1,0 +1,734 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  
+}
+
+body {
+  font-family: "Poppins", sans-serif;
+  display: flex;
+  background-color: #fff;
+  justify-content: center;
+  align-items: center;
+  display: block; min-height: 100vh;
+}
+main{
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;       /* centraliza horizontalmente */
+  gap: 24px;
+  width: 100%;
+  max-width: 1400px;
+  margin: 80px auto 40px;         /* espaço p/ header (80) e rodapé (40) */
+  padding: 0 20px;
+  min-height: calc(100vh - 120px); /* centraliza no restante da viewport (80 + 40) */
+}
+header{
+  font-family: 'Krona One', sans-serif;
+}
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: white;
+  padding: 0 40px;
+  height: 80px;
+  width: 100vw;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 100;
+}
+
+/* Lado esquerdo */
+.nav-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logu {
+  margin-top: 20px;
+  height: 80px;
+  width: auto;
+}
+
+/* Links centrais */
+.nav-center {
+  display: flex;
+  gap: 35px;
+}
+
+.nav-center a {
+  text-decoration: none;
+  color: #000;
+  font-size: 16px;
+  font-weight: 500;
+  transition: 0.2s ease;
+}
+
+.nav-center a:hover {
+  color: #4a64f5;
+}
+
+/* Lado direito */
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+/* Botão Criar */
+.btn-criar {
+  background-color: #4a64f5;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 30px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.btn-criar:hover {
+  background-color: #3549c7;
+}
+
+/* Ícones */
+.icon {
+  color: #4a64f5;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.icon:hover {
+  opacity: 0.7;
+}
+.user-icon {
+  border: 2px solid #4a64f5;
+  border-radius: 50%;
+  padding: 6px;
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: 0.3s;
+}
+.user-icon:hover {
+  background-color: #4a64f5;
+  color: white;
+}
+.calendar {
+  width: 771px;
+  height: 537px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(12px);
+  border-radius: 25px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+  padding: 25px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  animation: fadeIn 0.5s ease-in;
+  margin: 0;
+  font-family: 'Krona One', sans-serif;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px; /* espaçamento entre o mês e os dias */
+  
+}
+
+.header h2 {
+  font-size: 1.4rem;
+  color: black;
+  letter-spacing: 1px;
+  margin-bottom: 10px;
+}
+
+.nav-btn {
+  background: transparent;
+  color: black;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.nav-btn:hover {
+  transform: scale(1.3) rotate(10deg);
+}
+
+.weekdays, .days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  text-align: center;
+  margin-top: 20px;
+  gap: 10px;
+}
+
+.weekdays div {
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.weekday {
+  color: #4a6ef5; /* Azul para dias úteis */
+}
+
+.weekend {
+  color: #f34a4a; /* Vermelho para finais de semana */
+}
+
+.days div {
+  padding: 20px;
+  border-radius: 12px;
+  margin: 4px;
+  cursor: pointer;
+  font-size: 1.3rem;
+  transition: all 0.3s ease;
+  background: transparent;
+  
+  /* CORREÇÃO PRINCIPAL: Usar Flexbox para alinhar o conteúdo */
+  display: flex;
+  flex-direction: column; /* Coloca o número e o ponto um abaixo do outro inicialmente */
+  align-items: center; /* Centraliza horizontalmente */
+  justify-content: center; /* Centraliza verticalmente */
+  
+  /* Ajuste de padding/tamanho se necessário, se o padding original for muito grande */
+  padding: 10px 0; /* Reduz o padding para ter mais controle */
+  min-height: 50px; /* Garante uma altura mínima */
+}
+
+/* Hover respeitando a cor original */
+
+
+/* Dia atual */
+.days .today {
+  background: rgba(255,255,255,0.1);
+  border: 2px solid #fff;
+  border-radius: 8px;
+  font-weight: bold;
+  box-shadow: 0 0 10px rgba(255,255,255,0.7);
+}
+
+
+/* NOVO: Estilo para o dia ATUALMENTE SELECIONADO/CLICADO */
+.days div.selected-day {
+  /* Opcional: Adicione um fundo diferente ou uma borda para indicar que ele está ativo */
+  background: rgba(74, 110, 245, 0.2); /* Azul suave */
+  border: 1px solid #4a6ef5;
+  transform: scale(1.05); /* Pequeno destaque */
+}
+
+/* Garante que o dia atual (hoje) e o dia selecionado se misturem bem */
+.days .hoje.selected-day {
+   /* Mantém o estilo de hoje, mas adiciona a borda do selecionado */
+   border: 2px solid #4a6ef5; 
+   box-shadow: 0 0 10px rgba(74, 110, 245, 0.7);
+}
+/* Animação ao mudar mês */
+.fade {
+  opacity: 0;
+  transform: translateY(15px);
+  transition: all 0.3s ease;
+}
+.card-azul {
+  background-color: #708EF1;
+  border-radius: 30px;
+  padding: 20px;
+  width: 550px;
+  height: 550px;
+  color: #0c0c0c;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow-y: auto;
+  max-height: 800px;
+}
+
+.card-azul h2 {
+  color: #0c0c0c;
+  font-size: 18px;
+  margin-left: 5px;
+  margin-bottom: 15px;
+  font-family: 'Krona One', sans-serif;
+}
+
+.card-branco {
+  background-color: #fff;
+  border-radius: 20px;
+  margin-bottom: 15px;
+  padding: 10px 15px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.circulo {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: #FFA63D;
+  border: solid 1px #000;
+}
+
+.laranja {
+  background-color: #FFA63D;
+}
+
+.azul {
+  background-color: #33D8FF;
+}
+
+.roxo {
+  background-color: #B83FFF;
+}
+
+.conteudo {
+  flex: 1;
+}
+
+.card-branco h3 {
+  font-size: 13px;
+  color: #000;
+}
+
+.card-branco p {
+  font-size: 11px;
+  color: #555;
+}
+
+.lixo img {
+  margin-top: 5px;
+  width: 26px;
+  height: 26px;
+  cursor: pointer;
+}
+
+.botao-mais {
+  position: absolute;
+  bottom: 15px;
+  right: 15px;
+  background-color: #fff;
+  color: #708EF1;
+  border: none;
+  border-radius: 50%;
+  font-size: 22px;
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  transition: transform 0.2s ease;
+}
+
+.botao-mais:hover {
+  transform: scale(1.1);
+}
+
+/* --- MODAL --- */
+.modal {
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background: rgba(0,0,0,0.4);
+display: none;
+justify-content: center;
+align-items: center;
+z-index: 1000;
+}
+
+.modal-content {
+background-color: #708EF1;
+border-radius: 20px;
+padding: 25px;
+width: 400px;
+display: flex;
+flex-direction: column;
+gap: 15px;
+color: #0c0c0c;
+box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+
+.modal-content h2 {
+font-size: 16px;
+color: #0c0c0c;
+}
+
+.data-hora {
+display: flex;
+justify-content: space-between;
+align-items: center;
+}
+
+.data-hora .grupo {
+display: flex;
+gap: 8px;
+}
+
+.data-hora select {
+background-color: #fff;
+border: none;
+border-radius: 8px;
+padding: 5px 10px;
+font-size: 13px;
+cursor: pointer;
+}
+
+.hora-input {
+background-color: #fff;
+border: none;
+border-radius: 8px;
+padding: 5px 10px;
+font-size: 14px;
+color: #0c0c0c;
+cursor: text;
+width: 95px;
+text-align: center;
+}
+
+.hora-input::-webkit-calendar-picker-indicator {
+cursor: pointer;
+filter: invert(0.5);
+}
+
+.cores {
+display: flex;
+gap: 8px;
+}
+
+#hexColorInput {
+  width: 90px;
+  height: 30px;
+  border-radius: 8px;
+  border: 1px solid #708EF1;
+  text-align: center;
+  font-weight: bold;
+  color: #333;
+  background-color: #fff;
+}
+
+#hexColorInput:focus {
+  outline: none;
+  border-color: #4a6ee0;
+}
+
+.cor {
+width: 20px;
+height: 20px;
+border-radius: 50%;
+cursor: pointer;
+border: 2px solid transparent;
+transition: transform 0.2s ease;
+}
+
+.cor:hover {
+transform: scale(1.1);
+border-color: #999999;
+}
+.cor.selecionada {
+  border: 2px solid #fff; 
+  transform: scale(1.1);
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.2); 
+}
+.laranja { background: #FFA63D; }
+.ciano { background: #33D8FF; }
+.roxo { background: #B83FFF; }
+.vermelho { background: #FF4747; }
+.verde { background: #32E05E; }
+.mais {
+background: #fff;
+color: #708EF1;
+display: flex;
+justify-content: center;
+align-items: center;
+font-weight: bold;
+font-size: 16px;
+}
+input[type="text"],
+textarea {
+width: 100%;
+border: none;
+border-radius: 8px;
+padding: 8px;
+font-size: 13px;
+outline: none;
+}
+
+textarea {
+resize: none;
+height: 60px;
+}
+
+.rodape {
+display: flex;
+justify-content: space-between;
+align-items: center;
+}
+
+.alarme {
+display: flex;
+align-items: center;
+gap: 6px;
+}
+
+#toggle {
+width: 35px;
+height: 20px;
+appearance: none;
+background: #ccc;
+border-radius: 20px;
+position: relative;
+cursor: pointer;
+transition: background 0.3s;
+}
+
+#toggle:checked {
+background: #5EE35E;
+}
+
+#toggle::before {
+content: '';
+position: absolute;
+width: 16px;
+height: 16px;
+background: #fff;
+border-radius: 50%;
+top: 2px;
+left: 2px;
+transition: 0.3s;
+}
+
+#toggle:checked::before {
+left: 17px;
+}
+
+#salvar {
+background: #fff;
+color: #708EF1;
+border: none;
+border-radius: 8px;
+padding: 6px 15px;
+font-weight: bold;
+cursor: pointer;
+transition: transform 0.2s ease;
+}
+
+#salvar:hover {
+transform: scale(1.05);
+}
+
+/* Mini modal de cor */
+.color-modal {
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background: rgba(0,0,0,0.4);
+display: none;
+justify-content: center;
+align-items: center;
+z-index: 2000;
+}
+
+.color-modal-content {
+background: #fff;
+border-radius: 15px;
+padding: 20px;
+width: 250px;
+display: flex;
+flex-direction: column;
+align-items: center;
+gap: 15px;
+box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+.color-modal-content h3 {
+color: #0c0c0c;
+font-size: 16px;
+}
+
+#colorPickerInput {
+width: 100%;
+height: 40px;
+border: none;
+border-radius: 8px;
+cursor: pointer;
+}
+
+.color-buttons {
+display: flex;
+gap: 10px;
+}
+
+.color-buttons button {
+flex: 1;
+border: none;
+border-radius: 8px;
+padding: 6px 10px;
+cursor: pointer;
+font-weight: bold;
+transition: transform 0.2s ease;
+}
+
+#confirmColor {
+background: #708EF1;
+color: #fff;
+}
+
+#cancelColor {
+background: #eee;
+color: #333;
+}
+
+.color-buttons button:hover {
+transform: scale(1.05);
+}
+
+.ponto-evento {
+  width: 7px;
+  height: 7px;
+  background-color: #ff0000;
+  border-radius: 50%;
+  
+  /* CORREÇÃO: Remova o inline-block, margin-top e margin-left antigos */
+  /* display: inline-block; */
+  /* margin-top: 4px; */
+  /* margin-left: 4px; */
+  
+  /* Novo posicionamento: Use margin-top para criar espaço do número */
+  margin-top: 5px; /* Adiciona um pequeno espaço entre o número e o ponto */
+}
+#tooltip-global-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 0;
+  pointer-events: none; /* Mantém não clicável */
+  z-index: 9999;
+}
+
+.tooltip {
+    /* Novo Fundo Escuro */
+    background-color: #2c3e50; /* Cinza/Azul escuro, elegante */
+    color: #ecf0f1; /* Texto claro */
+    
+    border: none; /* Remove a borda azul */
+    border-radius: 8px; /* Borda mais suave */
+    padding: 10px 15px; /* Mais espaço interno */
+    min-width: 200px;
+    max-width: 250px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4); /* Sombra mais profunda e escura */
+    
+    /* Configurações de animação (Manter o essencial) */
+    position: absolute;
+    display: none;
+    opacity: 0;
+    transform: translateY(5px);
+    transition: opacity 0.2s ease-out, transform 0.2s ease-out;
+    pointer-events: none;
+    align-items: center;
+    
+    /* Adicionar um pequeno triângulo (opcional, mas comum em tooltips) */
+    position: relative; 
+}
+
+/* Triângulo na parte inferior do tooltip (opcional) */
+.tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: #2c3e50 transparent transparent transparent; /* Mesma cor de fundo */
+}
+
+
+.tooltip.show {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Estilo para cada evento dentro do tooltip */
+.tooltip-evento {
+    display: flex;
+    align-items: center;
+    margin-bottom: 6px;
+    padding: 3px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* Separador sutil */
+}
+
+.tooltip-evento:last-child {
+    margin-bottom: 0;
+    border-bottom: none;
+}
+
+.tooltip-evento .circulo {
+    width: 12px; /* Garante que o círculo tenha tamanho fixo */
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.3); /* Borda clara */
+}
+
+.tooltip-evento h4 {
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin: 0;
+    flex-grow: 1; /* Permite que o título ocupe o espaço */
+    color: #ecf0f1;
+}
+
+.tooltip-evento p {
+    font-size: 0.75rem;
+    font-weight: 300;
+    margin: 0;
+    color: #bdc3c7; /* Cor mais suave para a hora */
+    white-space: nowrap; /* Impede que a hora quebre linha */
+    margin-left: 10px;
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Responsivo */
+@media (max-width: 800px) {
+  .days div {
+    padding: 20px;
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-width: 400px) {
+  .calendar {
+    width: 90%;
+    padding: 20px;
+  }
+  .days div {
+    padding: 15px;
+    font-size: 1rem;
+  }
+}

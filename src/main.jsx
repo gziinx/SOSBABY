@@ -9,6 +9,7 @@ import Cadrespon from './pages/cadrespon/cadrespon'
 import CadastroMedico from './pages/cadmedico/cadmedico'
 import CadBebe from './pages/cadbebe/cadbebe'
 import Calendario from './pages/calendario/calendario'
+import Home from './pages/home/home'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
@@ -21,6 +22,7 @@ createRoot(document.getElementById('root')).render(
       <Route path="/cadbebe" element={<CadBebe/>}/>
       <Route path='/cadmedico'element={<CadastroMedico/>}/>
       <Route path='/calendario' element={<Calendario/>}/>
+      <Route path='/home' element={<Home/>}/> 
     </Routes>
     </BrowserRouter>
   </StrictMode>
