@@ -8,22 +8,23 @@
 body {
   font-family: "Poppins", sans-serif;
   display: flex;
-  background-color: #fff;
+  background-color: #ffffff;
   justify-content: center;
   align-items: center;
-  display: block; min-height: 100vh;
+  display: block; 
+  height: 100vh;
 }
-main{
+main {
   display: flex;
   flex-direction: row;
   justify-content: center;
-  align-items: center;       /* centraliza horizontalmente */
+  align-items: center;
   gap: 24px;
   width: 100%;
   max-width: 1400px;
-  margin: 80px auto 40px;         /* espaço p/ header (80) e rodapé (40) */
+  margin: 80px auto 40px;    /* espaço para o header fixo */
   padding: 0 20px;
-  min-height: calc(100vh - 120px); /* centraliza no restante da viewport (80 + 40) */
+  min-height: calc(100vh - 120px);
 }
 header{
   font-family: 'Krona One', sans-serif;
@@ -133,11 +134,11 @@ header{
   overflow: hidden;
   transition: all 0.3s ease;
   animation: fadeIn 0.5s ease-in;
-  margin: 0;
+  margin-left: 20px;
   font-family: 'Krona One', sans-serif;
 }
 
-.header {
+.ali {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -145,7 +146,7 @@ header{
   
 }
 
-.header h2 {
+.ali h2 {
   font-size: 1.4rem;
   color: black;
   letter-spacing: 1px;
@@ -169,7 +170,6 @@ header{
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   text-align: center;
-  margin-top: 20px;
   gap: 10px;
 }
 
@@ -228,7 +228,7 @@ header{
 }
 
 /* Garante que o dia atual (hoje) e o dia selecionado se misturem bem */
-.days .hoje.selected-day {
+.days .today.selected-day {
    /* Mantém o estilo de hoje, mas adiciona a borda do selecionado */
    border: 2px solid #4a6ef5; 
    box-shadow: 0 0 10px rgba(74, 110, 245, 0.7);
@@ -353,7 +353,7 @@ z-index: 1000;
 background-color: #708EF1;
 border-radius: 20px;
 padding: 25px;
-width: 400px;
+width: 500px;
 display: flex;
 flex-direction: column;
 gap: 15px;

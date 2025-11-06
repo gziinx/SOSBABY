@@ -1,4 +1,4 @@
-import { StrictMode } from 'react'
+import { Suspense, lazy } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import './pages/Inicio/App.css'
@@ -8,22 +8,24 @@ import Login from './pages/login/login'
 import Cadrespon from './pages/cadrespon/cadrespon'
 import CadastroMedico from './pages/cadmedico/cadmedico'
 import CadBebe from './pages/cadbebe/cadbebe'
-import Calendario from './pages/calendario/calendario'
-import Home from './pages/home/home'
+
+// Lazy load pages to isolate CSS per route
+const Calendarioo = lazy(() => import('./pages/calendario/calendario'))
+const Home = lazy(() => import('./pages/home/home'))
 
 createRoot(document.getElementById('root')).render(
-  <StrictMode>
-    <BrowserRouter>
-    <Routes>
-      <Route path='/' element={<Inicio/>}/>
-      <Route path="/cadastro" element={<Cadastro />} />
-      <Route path="/login" element={<Login/>}/>
-      <Route path="/cadrespon" element={<Cadrespon/>}/>
-      <Route path="/cadbebe" element={<CadBebe/>}/>
-      <Route path='/cadmedico'element={<CadastroMedico/>}/>
-      <Route path='/calendario' element={<Calendario/>}/>
-      <Route path='/home' element={<Home/>}/> 
-    </Routes>
-    </BrowserRouter>
-  </StrictMode>
+  <BrowserRouter>
+    <Suspense fallback={<div />}> 
+      <Routes>
+        <Route path='/' element={<Inicio/>}/>
+        <Route path="/cadastro" element={<Cadastro />} />
+        <Route path="/login" element={<Login/>}/>
+        <Route path="/cadrespon" element={<Cadrespon/>}/>
+        <Route path="/cadbebe" element={<CadBebe/>}/>
+        <Route path='/cadmedico' element={<CadastroMedico/>}/>
+        <Route path='/calendario' element={<Calendarioo/>}/>
+        <Route path='/home' element={<Home/>}/> 
+      </Routes>
+    </Suspense>
+  </BrowserRouter>
 )

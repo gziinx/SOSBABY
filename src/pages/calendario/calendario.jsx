@@ -2,8 +2,10 @@ import { useEffect } from "react";
 import './calendario.css'
 import logo from '../../assets/logoo.png';
 import trashIcon from '../../assets/image.png';
+import { useNavigate } from "react-router-dom";
 
-export default function Calendario() {
+export default function Calendarioo() {
+  const navigate = useNavigate();  
   useEffect(() => {
     // Inicializa ícones Lucide, se disponíveis globalmente
     try {
@@ -108,6 +110,28 @@ export default function Calendario() {
       return `${dia}/${mes}/${ano}`;
     }
 
+    // Toast simples e não bloqueante
+    function showToast(msg, type = 'info') {
+      const toast = document.createElement('div');
+      toast.textContent = msg;
+      toast.style.position = 'fixed';
+      toast.style.bottom = '20px';
+      toast.style.right = '20px';
+      toast.style.zIndex = '99999';
+      toast.style.padding = '10px 14px';
+      toast.style.borderRadius = '8px';
+      toast.style.color = '#fff';
+      toast.style.boxShadow = '0 4px 12px rgba(0,0,0,0.25)';
+      toast.style.fontSize = '14px';
+      toast.style.background = type === 'error' ? '#e74c3c' : '#2ecc71';
+      document.body.appendChild(toast);
+      setTimeout(() => {
+        toast.style.transition = 'opacity 0.3s ease';
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 300);
+      }, 1500);
+    }
+
     function exibirEventosNoCardAzul(eventos, dataSelecionada) {
       const container = document.getElementById('eventos-hoje');
       if (!container) return;
@@ -157,18 +181,19 @@ export default function Calendario() {
               const data = await response.json();
 
               if (response.ok) {
-                alert('Evento excluído com sucesso!');
+                showToast('Evento excluído com sucesso!');
                 await buscarEventos();
                 const dataExcluida = ev.data_calendario.split('T')[0];
                 const eventosAtualizados = todosEventos.filter(e => e.data_calendario.split('T')[0] === dataExcluida);
                 exibirEventosNoCardAzul(eventosAtualizados, dataExcluida);
                 renderCalendar();
+                setTimeout(() => { window.location.reload(); }, 600);
               } else {
-                alert('Erro ao excluir evento: ' + data.message);
+                showToast('Erro ao excluir evento: ' + (data.message || ''), 'error');
               }
             } catch (error) {
               console.error('Erro ao excluir:', error);
-              alert('Erro interno ao excluir evento');
+              showToast('Erro interno ao excluir evento', 'error');
             }
           }
         });
@@ -349,7 +374,9 @@ export default function Calendario() {
     primeiraCor?.classList.add('selecionada');
 
     const salvarBtn = document.getElementById('salvar');
-    salvarBtn?.addEventListener('click', async () => {
+    let isSaving = false;
+    if (salvarBtn) salvarBtn.onclick = async () => {
+      if (isSaving) return;
       const horaInput = document.querySelector('.hora-input');
       const tituloInput = document.querySelector('input[placeholder="Escreva o título"]');
       const descricaoInput = document.querySelector('textarea');
@@ -388,6 +415,12 @@ export default function Calendario() {
       };
 
       try {
+        // bloqueia cliques repetidos imediatamente
+        isSaving = true;
+        const prevText = salvarBtn.textContent;
+        salvarBtn.disabled = true;
+        salvarBtn.textContent = 'Salvando...';
+
         const response = await fetch('http://localhost:3030/v1/sosbaby/calender/cadastro', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -397,40 +430,33 @@ export default function Calendario() {
         const data = await response.json();
 
         if (response.ok) {
-          alert('Evento salvo com sucesso!');
+          setTimeout(() => { salvarBtn.textContent = 'Salvo!'; }, 100);
           if (modal) modal.style.display = 'none';
           await buscarEventos();
           renderCalendar();
+          showToast('Evento salvo com sucesso!');
         } else {
-          alert('Erro ao salvar evento: ' + data.message);
+          showToast('Erro ao salvar evento: ' + (data.message || ''), 'error');
         }
 
       } catch (error) {
         console.error('Erro na requisição:', error);
-        alert('Erro interno ao salvar evento');
-      }
-    });
-
-    document.querySelectorAll('.lixo').forEach(lixo => {
-      lixo.addEventListener('click', async (e) => {
-        const id = e.currentTarget.dataset.id;
-        if (confirm('Deseja realmente excluir este evento?')) {
-          try {
-            const response = await fetch(`http://localhost:3030/v1/sosbaby/calender/${id}`, { method: 'DELETE' });
-            const data = await response.json();
-            if (response.ok) {
-              alert('Evento excluído com sucesso!');
-              listarEventosDoDiaAtual();
-            } else {
-              alert('Erro ao excluir evento: ' + data.message);
-            }
-          } catch (error) {
-            console.error('Erro ao excluir:', error);
-            alert('Erro interno ao excluir evento');
-          }
+        showToast('Erro interno ao salvar evento', 'error');
+      } finally {
+        // libera botão
+        if (salvarBtn) {
+          setTimeout(() => {
+            salvarBtn.textContent = 'Salvar';
+            salvarBtn.disabled = false;
+            isSaving = false;
+          }, 800);
+        } else {
+          isSaving = false;
         }
-      });
-    });
+      }
+    };
+
+    // Removido: listeners globais duplicados de exclusão, agora cada card gerencia seu próprio clique
 
     prevBtn?.addEventListener("click", () => { date.setMonth(date.getMonth() - 1); renderCalendar("prev"); });
     nextBtn?.addEventListener("click", () => { date.setMonth(date.getMonth() + 1); renderCalendar("next"); });
@@ -442,6 +468,12 @@ export default function Calendario() {
     return () => {};
     // ------------------ Fim do script adaptado ------------------
   }, []);
+  const handlerHome = () => {
+    navigate('/home');
+  };
+  const handlerCalendar = () => {
+    navigate('/calendario');
+  };
 
   return (
     <>
@@ -452,8 +484,8 @@ export default function Calendario() {
           </div>
 
           <div className="nav-center">
-            <a href="#">Home</a>
-            <a href="#">Calendário</a>
+            <a href="#" onClick={handlerHome}>Home</a>
+            <a href="#" onClick={handlerCalendar}>Calendário</a>
             <a href="#">Dicas</a>
             <a href="#">Consultas</a>
             <a href="#">Rotina</a>
@@ -525,7 +557,7 @@ export default function Calendario() {
         <div id="tooltip-global-container"></div>
 
         <div className="calendar">
-          <div className="header">
+          <div className="ali">
             <button id="prev" className="nav-btn">←</button>
             <h2 id="month-year">Outubro 2025</h2>
             <button id="next" className="nav-btn">→</button>
