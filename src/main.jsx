@@ -8,6 +8,7 @@ import Login from './pages/login/login'
 import Cadrespon from './pages/cadrespon/cadrespon'
 import CadastroMedico from './pages/cadmedico/cadmedico'
 import CadBebe from './pages/cadbebe/cadbebe'
+import Rotina from './pages/rotina/rotina'
 
 // Lazy load pages to isolate CSS per route
 const Calendarioo = lazy(() => import('./pages/calendario/calendario'))
@@ -25,6 +26,7 @@ createRoot(document.getElementById('root')).render(
         <Route path='/cadmedico' element={<CadastroMedico/>}/>
         <Route path='/calendario' element={<Calendarioo/>}/>
         <Route path='/home' element={<Home/>}/> 
+        <Route path='/rotina' element={<Rotina/>}/>
       </Routes>
     </Suspense>
   </BrowserRouter>
