@@ -12,6 +12,7 @@ import Rotina from './pages/rotina/rotina'
 import HomeClinica from './pages/homeclinica/homeclnca'
 import Tipo from './pages/tipo/tipo'
 import VideoCall from './pages/video/video'
+import ChatComIA from './pages/chatcomia/chatcomia'
 // Lazy load pages to isolate CSS per route
 const Calendarioo = lazy(() => import('./pages/calendario/calendario'))
 const Home = lazy(() => import('./pages/home/home'))
@@ -32,6 +33,7 @@ createRoot(document.getElementById('root')).render(
         <Route path='/tipo' element={<Tipo/>}/>
         <Route path='/homeclinica' element={<HomeClinica/>}/>
         <Route path='/video' element={<VideoCall/>}/>
+        <Route path='/chatcomia' element={<ChatComIA/>}/>
       </Routes>
     </Suspense>
   </BrowserRouter>
