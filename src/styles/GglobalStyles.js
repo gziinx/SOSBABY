@@ -39,10 +39,8 @@ export const CadoisStyle = createGlobalStyle`
         font-family: 'Krona One', sans-serif;;
     }
     body {
-    background-image: url("../../src/assets/fund.png");
     display: flex;
-    justify-content: center;
-    align-items: center;
+    flex-direction: row;
   }
 `
 export const CalendarioGlobal = createGlobalStyle`

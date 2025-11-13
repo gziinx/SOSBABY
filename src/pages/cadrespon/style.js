@@ -30,13 +30,27 @@ export const TituDiv = styled.div`
   margin-bottom: 27px;
 `;
 
+// Container geral para alinhar a imagem (esquerda) e o formulário (direita)
+export const Container = styled.div`
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  width: 100vw;
+  height: 100vh;
+  max-width: none;
+  margin: 0;
+  gap: 0;
+  overflow: hidden;
+`;
+
 export const Formm = styled.form`
-  background: #fff;
-  border-radius: 50px;
+  background: #ffffffff;
+  border-radius: 50px 0px 0px 50px ;
   padding: 40px;
-  width: 1000px;
-  border: 1px solid black;
-  margin-bottom: 10px;
+  width: 100%;
+  flex: 1 1 60%;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
 `;
 
 export const Section = styled.div`
@@ -133,4 +147,13 @@ export const Btn = styled.button`
   &:hover {
     background: #357abd;
   }
+`;
+
+export const Fundu = styled.img`
+  flex: 0 0 40%;
+  width: 40%;
+  height: 100%;
+  align-self: stretch;
+  object-fit: cover;
+  display: block;
 `;

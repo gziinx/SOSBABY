@@ -12,10 +12,12 @@ import {
   UploadBox,
   BtnContainer,
   Btn,
-  CheckboxItem
+  CheckboxItem,
+  Fundu,
+  Container
 } from "./style";
 import { CadoisStyle } from "../../styles/GglobalStyles";
-import foto from "../../assets/logu.png";
+import fundu from "../../assets/cadres.png";
 
 function CadastroRespon() {
   const [nome, setNome] = useState("");
@@ -102,15 +104,9 @@ function CadastroRespon() {
   
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+    <Container>
       <CadoisStyle />
-
-      <Logo>
-        <LogoImg src={foto} alt="Logo" />
-      </Logo>
-
-      <TituDiv>DADOS DO RESPONSÁVEL</TituDiv>
-
+      <Fundu src={fundu} alt="" />
       <Formm id="cad" onSubmit={handleSubmit}>
         {/* Identificação */}
         <Section>
@@ -224,7 +220,7 @@ function CadastroRespon() {
           <Btn type="submit">PRÓXIMO</Btn>
         </BtnContainer>
       </Formm>
-    </div>
+    </Container>
   );
 }
 
