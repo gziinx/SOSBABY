@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import {
-  Logo,
-  LogoImg,
-  TituDiv,
+  Container,
+  Fundu,
+  FundoContainer,
+  TituloSobreImagem,
+  VoltarBtn,
   Formm,
   Section,
   Identificacao,
@@ -13,46 +15,49 @@ import {
   BtnContainer,
   Btn,
   CheckboxItem,
-  Fundu,
-  Container
-} from "./style";
-import { CadoisStyle } from "../../styles/GglobalStyles";
-import fundu from "../../assets/cadres.png";
+} from "./style.js";
+import { GlobalStyle } from "../../styles/GglobalStyles.js";
+import funduImage from "../../assets/cadres.png";
 
 function CadastroRespon() {
   const [nome, setNome] = useState("");
-  const [data_nascimento, setDataNascimento] = useState("");
+  const [dataNascimento, setDataNascimento] = useState("");
   const [cpf, setCpf] = useState("");
   const [telefone, setTelefone] = useState("");
-  const [cartao_medico, setCartao] = useState("");
+  const [email, setEmail] = useState("");
+  const [senha, setSenha] = useState("");
+  const [cartaoMedico, setCartaoMedico] = useState("");
   const [cep, setCep] = useState("");
   const [segundoResponsavel, setSegundoResponsavel] = useState(false);
-  const [arquivoBase64, setArquivoBase64] = useState(""); 
+  const [arquivoBase64, setArquivoBase64] = useState("");
   const [arquivo, setArquivo] = useState(null);
+
   // Redimensiona e comprime a imagem antes de enviar
   const handleFileChange = (e) => {
-    const file = e.target.files[0];
+    const file = e.target.files?.[0];
     if (!file) return;
 
     setArquivo(file);
+
     const reader = new FileReader();
     reader.onload = (event) => {
-      let img = new Image();
-      img.src = event.target.result;
+      const img = new Image();
+      img.src = event.target?.result;
 
       img.onload = () => {
         const canvas = document.createElement("canvas");
-        const maxWidth = 500; 
+        const maxWidth = 500;
         const scaleSize = maxWidth / img.width;
         canvas.width = maxWidth;
         canvas.height = img.height * scaleSize;
 
         const ctx = canvas.getContext("2d");
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        if (ctx) {
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-        // Converte para base64 e comprime
-        const resizedBase64 = canvas.toDataURL("image/jpeg", 0.7);
-        setArquivoBase64(resizedBase64);
+          const resizedBase64 = canvas.toDataURL("image/jpeg", 0.7);
+          setArquivoBase64(resizedBase64);
+        }
       };
     };
     reader.readAsDataURL(file);
@@ -60,57 +65,68 @@ function CadastroRespon() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
-    // Garante que o usuário selecionou uma imagem
+
     if (!arquivoBase64) {
       alert("Selecione uma imagem antes de enviar.");
       return;
     }
-  
+
     const dados = {
       nome: nome,
-      data_nascimento: data_nascimento,
+      data_nascimento: dataNascimento,
       cpf: cpf,
       telefone: telefone,
-      cartao_medico: cartao_medico, // 👈 nome certo
+      email: email,
+      senha: senha,
+      cartao_medico: cartaoMedico,
       cep: cep,
-      arquivo: arquivo.name,       // 👈 base64 da imagem
+      arquivo: arquivoBase64,
       id_sexo: 1,
-      id_user: 1
+      id_user: 1,
     };
-  
+
     try {
-      const response = await fetch("http://localhost:3030/v1/sosbaby/resp/cadastro", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(dados),
-      });
-  
+      const response = await fetch(
+        "http://localhost:3030/v1/sosbaby/resp/cadastro",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(dados),
+        }
+      );
+
       const data = await response.json();
-  
+
       if (response.ok) {
-        alert("Cadastro do bebê realizado com sucesso!");
+        alert("Cadastro realizado com sucesso!");
         console.log(data);
       } else {
         console.error(data);
-        alert(data.message || "Erro ao cadastrar bebê.");
+        alert(data.message || "Erro ao cadastrar.");
       }
     } catch (error) {
       console.error(error);
       alert("Erro no processo de cadastro.");
     }
   };
-  
-  
 
   return (
     <Container>
-      <CadoisStyle />
-      <Fundu src={fundu} alt="" />
+      <GlobalStyle />
+      <FundoContainer>
+  <Fundu src={funduImage} alt="Imagem de fundo" />
+
+  <TituloSobreImagem>Cadastro do Responsável</TituloSobreImagem>
+
+  <VoltarBtn onClick={() => window.location.href = "/"}>
+    Voltar para início
+  </VoltarBtn>
+</FundoContainer>
       <Formm id="cad" onSubmit={handleSubmit}>
         {/* Identificação */}
         <Section>
-          <Identificacao icon="❤">RESPONSAVEL</Identificacao>
+          <Identificacao icon="❤">RESPONSÁVEL</Identificacao>
+
           <InputGroup>
             <label htmlFor="nome">Nome completo *</label>
             <Input
@@ -124,11 +140,11 @@ function CadastroRespon() {
           </InputGroup>
 
           <InputGroup>
-            <label htmlFor="data_nascimento">Data de Nascimento *</label>
+            <label htmlFor="dataNascimento">Data de Nascimento *</label>
             <Input
               type="date"
-              id="data_nascimento"
-              value={data_nascimento}
+              id="dataNascimento"
+              value={dataNascimento}
               onChange={(e) => setDataNascimento(e.target.value)}
               required
             />
@@ -159,22 +175,50 @@ function CadastroRespon() {
               />
             </InputGroup>
           </Row>
+
+          <Row>
+            <InputGroup>
+              <label htmlFor="email">E-mail</label>
+              <Input
+                type="email"
+                id="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="exemplo@email.com"
+                required
+              />
+            </InputGroup>
+
+            <InputGroup>
+              <label htmlFor="senha">Senha</label>
+              <Input
+                type="password"
+                id="senha"
+                value={senha}
+                onChange={(e) => setSenha(e.target.value)}
+                placeholder="••••••••"
+                required
+              />
+            </InputGroup>
+          </Row>
         </Section>
 
         {/* Documentos */}
         <Section>
           <Identificacao icon="🩺">Documentos</Identificacao>
+
           <InputGroup>
-            <label htmlFor="cartao_medico">Cartão SUS/Convênio</label>
+            <label htmlFor="cartaoMedico">Cartão SUS/Convênio</label>
             <Input
               type="text"
-              id="cartao_medico"
-              value={cartao_medico}
-              onChange={(e) => setCartao(e.target.value)}
+              id="cartaoMedico"
+              value={cartaoMedico}
+              onChange={(e) => setCartaoMedico(e.target.value)}
               placeholder="Escreva"
               required
             />
           </InputGroup>
+
           <InputGroup>
             <label htmlFor="cep">CEP</label>
             <Input
@@ -191,27 +235,38 @@ function CadastroRespon() {
         {/* Upload */}
         <Section>
           <Identificacao icon="📤">Upload de Arquivos</Identificacao>
+
           <InputGroup>
             <UploadBox htmlFor="arquivo">
-              <span style={{ fontSize: "40px", color: "#d3a6b5" }}>⬆</span>
+              {arquivo ? (
+                <span style={{ fontSize: "14px", color: "#708ef1" }}>
+                  {arquivo.name}
+                </span>
+              ) : (
+                <span style={{ fontSize: "40px", color: "#d3a6b5" }}>⬆</span>
+              )}
             </UploadBox>
+
             <Input
               type="file"
               id="arquivo"
               accept="image/*"
               hidden
-              onChange={handleFileChange} // redimensiona e envia base64
+              onChange={handleFileChange}
               required
             />
           </InputGroup>
+
           <CheckboxItem>
             <Input
               type="checkbox"
-              id="segundo_responsavel"
+              id="segundoResponsavel"
               checked={segundoResponsavel}
               onChange={(e) => setSegundoResponsavel(e.target.checked)}
             />
-            <label htmlFor="segundo_responsavel">Adicionar segundo responsável</label>
+            <label htmlFor="segundoResponsavel">
+              Adicionar segundo responsável
+            </label>
           </CheckboxItem>
         </Section>
 
@@ -225,3 +280,5 @@ function CadastroRespon() {
 }
 
 export default CadastroRespon;
+
+

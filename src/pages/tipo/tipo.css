@@ -1,0 +1,117 @@
+/* Container geral */
+.tipo-container {
+    background: linear-gradient(#708EF1, #ffffff);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px;
+}
+
+/* Header */
+.tipo-header {
+    text-align: center;
+    margin-top: 40px;
+}
+
+.tipo-header h1 {
+    font-size: 64px;
+    color: #ffffff;
+    margin-bottom: 15px;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.tipo-header p {
+    font-size: 22px;
+    color: #e8e8e8;
+}
+
+/* Cards */
+.tipo-cards {
+    margin-top: 40px;
+    width: 90%;
+    display: flex;
+    gap: 40px;
+    justify-content: center;
+    flex-wrap: wrap;  /* RESPONSIVO */
+}
+
+.tipo-card {
+    background: #ffffff;
+    width: 350px;
+    padding: 35px;
+    border-radius: 30px;
+    box-shadow: 0px 12px 20px rgba(0,0,0,0.15);
+    text-align: center;
+    transition: 0.3s ease;
+    cursor: pointer;
+}
+
+/* Efeito hover */
+.tipo-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0px 18px 28px rgba(0,0,0,0.22);
+}
+
+.tipo-card-img {
+    background: #708EF1;
+    width: 110px;
+    height: 110px;
+    margin: 0 auto;
+    border-radius: 25px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.tipo-card-img img {
+    width: 60%;
+}
+
+.tipo-card h2 {
+    margin-top: 20px;
+    font-size: 30px;
+    color: #081C60;
+}
+
+.tipo-card p {
+    margin-top: 10px;
+    font-size: 18px;
+    color: #537BC4;
+    line-height: 1.4;
+}
+/* Botão voltar */
+.btn-voltar {
+    position: fixed;
+    bottom: 25px;
+    left: 25px;
+    background: transparent;
+    color: rgb(0, 0, 0);
+    border: none;
+    padding: 12px 22px;
+    font-size: 18px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn-voltar:hover {
+    background: #0b2a8581;
+    transform: translateX(-3px);
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .tipo-header h1 {
+        font-size: 40px;
+    }
+
+    .tipo-header p {
+        font-size: 18px;
+    }
+
+    .tipo-card {
+        width: 90%;
+    }
+}

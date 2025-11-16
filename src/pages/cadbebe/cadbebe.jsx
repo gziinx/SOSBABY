@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from "react";
+
 import {
+    Container,
+    FormWrapper,
     Logo,
     LogoImg,
     TituDiv,
@@ -11,11 +14,14 @@ import {
     Row,
     UploadBox,
     BtnContainer,
-    Btn
+    Btn,
+    FundoContainer,
+    Fundu,
+    TituloSobreImagem,
+    VoltarBtn
 } from "./style";
 import { CadoisStyle } from "../../styles/GglobalStyles";
-import foto from "../../assets/logu.png";
-
+import foto from "../../assets/cadres.png";
 function CadastroBebe() {
     const [nome, setNome] = useState("");
     const [dataNascimento, setDataNascimento] = useState("");
@@ -106,17 +112,20 @@ function CadastroBebe() {
       };
 
     return (
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-            <CadoisStyle />
-            <Logo>
-                <LogoImg src={foto} alt="Logo" />
-            </Logo>
-            <TituDiv>DADOS DO BEBÊ</TituDiv>
+    <Container>
+        <CadoisStyle />
+
+        {/* LADO ESQUERDO – FORMULÁRIO */}
+        <FormWrapper>
+
+
 
             <Formm onSubmit={handleSubmit}>
+
                 {/* Identificação */}
                 <Section>
                     <Identificacao icon="❤">Identificação</Identificacao>
+
                     <InputGroup>
                         <label>Nome completo *</label>
                         <Input
@@ -149,22 +158,21 @@ function CadastroBebe() {
                         </InputGroup>
                     </Row>
 
-                    <Row>
-                        <InputGroup>
-                            <label>Nacionalidade *</label>
-                            <Input
-                                value={nacionalidade}
-                                onChange={(e) => setNacionalidade(e.target.value)}
-                                placeholder="Ex: Brasileiro"
-                                required
-                            />
-                        </InputGroup>
-                    </Row>
+                    <InputGroup>
+                        <label>Nacionalidade *</label>
+                        <Input
+                            value={nacionalidade}
+                            onChange={(e) => setNacionalidade(e.target.value)}
+                            placeholder="Ex: Brasileiro"
+                            required
+                        />
+                    </InputGroup>
                 </Section>
 
                 {/* Saúde ao Nascer */}
                 <Section>
                     <Identificacao icon="🩺">Saúde ao Nascer</Identificacao>
+
                     <Row>
                         <InputGroup>
                             <label>Peso *</label>
@@ -201,6 +209,7 @@ function CadastroBebe() {
                 {/* Documentos */}
                 <Section>
                     <Identificacao icon="📄">Documentos</Identificacao>
+
                     <InputGroup>
                         <label>Certidão de Nascimento</label>
                         <Input
@@ -240,9 +249,26 @@ function CadastroBebe() {
                 <BtnContainer>
                     <Btn type="submit">PRÓXIMO</Btn>
                 </BtnContainer>
+
             </Formm>
-        </div>
-    );
+        </FormWrapper>
+
+        {/* LADO DIREITO – IMAGEM */}
+        <FundoContainer>
+            <TituloSobreImagem>Cadastro do Bebê</TituloSobreImagem>
+
+            <Fundu
+                src={foto}
+                alt="Imagem Bebê"
+            />
+
+            <VoltarBtn>Voltar ao início</VoltarBtn>
+        </FundoContainer>
+
+    </Container>
+);
+
+
 }
 
 export default CadastroBebe;

@@ -53,8 +53,12 @@ function Inicio() {
     navigate('/login');
   };
 
+  const handleSing = () => {
+    navigate('/tipo');
+  };
+
   const handleStart = () => {
-    navigate('/login');
+    navigate('/tipo');
   };
 
   return (
@@ -75,7 +79,7 @@ function Inicio() {
 
         <div className="header-buttons">
           <button className="btn-login" onClick={handleLogin}>Login</button>
-          <button className="btn-signup" onClick={handleLogin}>Sing Up</button>
+          <button className="btn-signup" onClick={handleSing}>Sing Up</button>
         </div>
       </header>
 

@@ -145,3 +145,79 @@ export const Select = styled.select`
   box-sizing: border-box;
   transition: border 0.3s;
 `;
+/* Container geral lado a lado */
+export const Tela = styled.div`
+  display: flex;
+  width: 100%;
+  height: auto;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 40px;
+  margin-top: 20px;
+`;
+
+/* Lado esquerdo (formulário) */
+export const LadoEsquerdo = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+`;
+
+/* Lado direito com imagem */
+export const Container = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 420px;
+  width: 100%;
+  min-height: 100vh;
+  padding: 0 20px;
+`;
+
+export const FormWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-right: 30px;
+`;
+
+export const FundoContainer = styled.div`
+  position: relative;
+  width: 100%;
+  height: 100%;
+  max-height: 900px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+
+export const Fundu = styled.img`
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50px 0 0 50px;
+`;
+
+export const TituloSobreImagem = styled.div`
+  position: absolute;
+  top: 30px;
+  background: #4969d0;
+  padding: 14px 30px;
+  font-size: 22px;
+  color: #fff;
+  border-radius: 20px;
+`;
+
+export const VoltarBtn = styled.button`
+  position: absolute;
+  bottom: 30px;
+  background: #fff;
+  padding: 12px 22px;
+  font-size: 16px;
+  border-radius: 20px;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+
+  &:hover {
+    background: #e6e6e6;
+  }
+`;

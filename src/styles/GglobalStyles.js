@@ -32,17 +32,25 @@ export const CadStyle = createGlobalStyle`
   }
 `
 export const CadoisStyle = createGlobalStyle`
-*{
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-        font-family: 'Krona One', sans-serif;;
-    }
-    body {
-    display: flex;
-    flex-direction: row;
+  @import url('https://fonts.googleapis.com/css2?family=Krona+One&display=swap');
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
   }
-`
+
+  body {
+    background: #fff;
+    font-family: 'Krona One', sans-serif;
+    overflow-x: hidden;
+  }
+
+  #root {
+    width: 100%;
+    min-height: 100vh;
+  }
+`;
 export const CalendarioGlobal = createGlobalStyle`
   * {
     margin: 0;
@@ -55,6 +63,7 @@ export const CalendarioGlobal = createGlobalStyle`
     background-color: white;
     font-family: 'Krona One', sans-serif;
     display: block;
+    height: 100vh
   }
 `;
 
