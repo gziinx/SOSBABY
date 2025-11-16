@@ -32,11 +32,15 @@ export const TituDiv = styled.div`
 
 export const Formm = styled.form`
   background: #fff;
-  border-radius: 50px;
-  padding: 40px;
-  width: 1000px;
-  border: 1px solid black;
+  padding: 60px;
+  width: 100%;
+  border: none;
   margin-bottom: 10px;
+
+  @media (max-width: 768px) {
+    padding: 24px;
+    border-radius: 32px;
+  }
 `;
 
 export const Section = styled.div`
@@ -60,6 +64,18 @@ export const Identificacao = styled.h2`
 
 export const InputGroup = styled.div`
   margin-bottom: 20px;
+
+  label {
+    display: block;
+    margin-bottom: 8px;
+    font-family: 'Krona One', sans-serif;
+    font-size: 14px;
+    color: #333;
+
+    @media (max-width: 768px) {
+      font-size: 12px;
+    }
+  }
 `;
 
 export const Input = styled.input`
@@ -80,16 +96,23 @@ export const Row = styled.div`
 `;
 
 export const UploadBox = styled.label`
-  border: 1px solid #d3a6b5;
-  border-radius: 10px;
-  height: 100px;
   width: 100%;
+  height: 120px;
+  border: 2px dashed #d3a6b5;
+  border-radius: 12px;
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
   cursor: pointer;
   background-color: #fff;
   margin-bottom: 15px;
+  text-align: center;
+  transition: 0.3s;
+
+  &:hover {
+    border-color: #708ef1;
+    background: #f7f9ff;
+  }
 `;
 
 export const CheckboxItem = styled.div`
@@ -163,61 +186,80 @@ export const LadoEsquerdo = styled.div`
   align-items: center;
 `;
 
-/* Lado direito com imagem */
+/* Layout principal: formulário à esquerda e painel da imagem à direita */
 export const Container = styled.div`
   display: grid;
-  grid-template-columns: 1fr 420px;
+  grid-template-columns: 1fr 1fr;
   width: 100%;
+  max-width: none;
+  margin: 0;
+  gap: 0;
   min-height: 100vh;
-  padding: 0 20px;
+  align-items: stretch;
+
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+  }
 `;
 
 export const FormWrapper = styled.div`
   display: flex;
   flex-direction: column;
-  align-items: center;
-  padding-right: 30px;
+  align-items: center;  
+
+  @media (max-width: 900px) {
+    padding: 24px 20px;
+  }
 `;
 
 export const FundoContainer = styled.div`
   position: relative;
   width: 100%;
   height: 100%;
-  max-height: 900px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
 `;
 
 export const Fundu = styled.img`
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border-radius: 50px 0 0 50px;
+
+  @media (max-width: 900px) {
+    height: 250px;
+    width: 100%;
+  }
 `;
 
-export const TituloSobreImagem = styled.div`
+export const TituloSobreImagem = styled.h1`
   position: absolute;
-  top: 30px;
-  background: #4969d0;
-  padding: 14px 30px;
-  font-size: 22px;
-  color: #fff;
-  border-radius: 20px;
+  top: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 42px;
+  color: #ffffff;
+  font-weight: 500;
+  letter-spacing: 2px;
+  text-align: center;
+
+  @media (max-width: 900px) {
+    font-size: 28px;
+  }
 `;
 
 export const VoltarBtn = styled.button`
   position: absolute;
-  bottom: 30px;
-  background: #fff;
-  padding: 12px 22px;
-  font-size: 16px;
+  bottom: 24px;
+  right: 24px;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 10px 18px;
+  font-size: 15px;
   border-radius: 20px;
   border: none;
   cursor: pointer;
-  font-weight: bold;
+  font-weight: 600;
+  transition: 0.3s;
 
   &:hover {
-    background: #e6e6e6;
+    background: #708ef1;
+    color: #fff;
   }
 `;

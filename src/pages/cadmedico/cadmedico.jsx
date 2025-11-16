@@ -1,75 +1,93 @@
-import { Bore, Titu, Linha, Butao, Fundula } from "./style"
-import Inputzada from "../../components/inputzada"
-import { GlobalStyle, CadStyle } from "../../styles/GglobalStyles"
-import footinha from "../../assets/funduu.png"
-
+import { Bore, Titu, Linha, Butao, Fundula, Container, FormWrapper, FundoContainer, Fundu, TituloSobreImagem, VoltarBtn } from "./style";
+import Inputzada from "../../components/inputzada";
+import { CadoisStyle } from "../../styles/GglobalStyles";
+import footinha from "../../assets/CADMED.png";
 
 
 function CadastroMedico() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+  };
 
-    if (senha !== confirmSenha) {
-      alert("As senhas são diferentes.");
-      return;
-    }
-    }
   return (
-    <Bore>
-      <CadStyle />
-      <Titu>Cadastrar-se</Titu>
+    <Container>
+      <CadoisStyle />
 
-      <form onSubmit={handleSubmit}>
-      <Inputzada
-        type="email"
-        placeholder="EMAIL"
-        icon="@"
-        value=""
-        onChange=""
-      />
+      {/* LADO ESQUERDO – FORMULÁRIO */}
+      <FormWrapper>
+        <Bore>
+          <Titu>Medico</Titu>
 
-      <Inputzada
-        type="password"
-        placeholder="SENHA"
-        icon="🔒"
-        value=""
-        onChange=""
-      />
+          <form onSubmit={handleSubmit}>
+            <Inputzada
+              type="text"
+              placeholder="Nome completo *"
+              icon="👤"
+              value=""
+              onChange=""
+            />
 
-      <Inputzada
-        type="password"
-        placeholder="CONFIRMAR"
-        icon="🔒"
-        value=""
-        onChange=""
-      />
-      <Inputzada
-        type="number"
-        placeholder="TELEFONE"
-        icon="📞"
-        value=""
-        onChange=""
-      />
-      <Inputzada
-        type="password"
-        placeholder="CRM"
-        icon="🍆"
-        value=""
-        onChange=""
-      />
-      <Inputzada
-        type="date"
-        placeholder="DATA DE NASCIMENTO"
-        icon="📠"
-        value=""
-        onChange=""
-      />
-      <Linha />
-      <Butao type="submit">CADASTRAR</Butao>
-      <Fundula src={footinha} alt="" />
-      </form>
-    </Bore>
-  )
+            <Inputzada
+              type="email"
+              placeholder="E-mail"
+              icon="@"
+              value=""
+              onChange=""
+            />
+
+            <Inputzada
+              type="password"
+              placeholder="Senha"
+              icon="🔒"
+              value=""
+              onChange=""
+            />
+            <Inputzada
+              type="text"
+              placeholder="CPF"
+              icon="�"
+              value=""
+              onChange=""
+            />
+            <Inputzada
+              type="text"
+              placeholder="CRM"
+              icon="�"
+              value=""
+              onChange=""
+            />
+            <Inputzada
+              type="text"
+              placeholder="Telefone"
+              icon="📞"
+              value=""
+              onChange=""
+            />
+            <Inputzada
+              type="text"
+              placeholder="Sexo"
+              icon="⚧"
+              value=""
+              onChange=""
+            />
+            <Linha />
+            <Butao type="submit">SALVAR</Butao>
+          </form>
+        </Bore>
+      </FormWrapper>
+
+      {/* LADO DIREITO – IMAGEM */}
+      <FundoContainer>
+        <Fundu src={footinha} alt="Cadastro do médico" />
+
+        <TituloSobreImagem>Cadastro do Medico</TituloSobreImagem>
+
+        <VoltarBtn onClick={() => (window.location.href = "/")}>
+          Voltar ao início
+        </VoltarBtn>
+      </FundoContainer>
+    </Container>
+  );
 }
 export default CadastroMedico

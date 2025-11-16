@@ -43,11 +43,6 @@ export const CadoisStyle = createGlobalStyle`
   body {
     background: #fff;
     font-family: 'Krona One', sans-serif;
-    overflow-x: hidden;
-  }
-
-  #root {
-    width: 100%;
     min-height: 100vh;
   }
 `;
