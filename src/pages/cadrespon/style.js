@@ -32,26 +32,35 @@ export const TituDiv = styled.div`
 
 // Container geral para alinhar a imagem (esquerda) e o formulário (direita)
 export const Container = styled.div`
-  display: flex;
-  align-items: stretch;
-  justify-content: space-between;
-  width: 100vw;
-  height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  width: 100%;
   max-width: none;
   margin: 0;
   gap: 0;
   overflow: hidden;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
 `;
 
+
+
 export const Formm = styled.form`
-  background: #ffffffff;
-  border-radius: 50px 0px 0px 50px ;
+  background: #fff;
+  border-radius: 50px 0 0 50px;
   padding: 40px;
   width: 100%;
-  flex: 1 1 60%;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-  overflow: hidden;
+
+
+  @media (max-width: 768px) {
+    border-radius: 30px 30px 0 0;  
+    padding: 25px;
+  }
 `;
+
 
 export const Section = styled.div`
   margin-bottom: 20px;
@@ -148,12 +157,14 @@ export const Btn = styled.button`
     background: #357abd;
   }
 `;
-
 export const Fundu = styled.img`
-  flex: 0 0 40%;
-  width: 40%;
-  height: 100%;
-  align-self: stretch;
+  width: 100%;
+  height: auto;
   object-fit: cover;
   display: block;
+
+  @media (max-width: 768px) {
+    height: 250px;      /* você pode mudar este tamanho */
+    width: 100%;
+  }
 `;
