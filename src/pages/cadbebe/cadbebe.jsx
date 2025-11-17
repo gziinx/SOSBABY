@@ -118,8 +118,6 @@ function CadastroBebe() {
         {/* LADO ESQUERDO – FORMULÁRIO */}
         <FormWrapper>
 
-
-
             <Formm onSubmit={handleSubmit}>
 
                 {/* Identificação */}
@@ -241,7 +239,15 @@ function CadastroBebe() {
                 {/* Upload */}
                 <Section>
                     <Identificacao icon="📤">Upload de Arquivos</Identificacao>
-                    <UploadBox htmlFor="arquivo">Clique ou arraste uma imagem aqui</UploadBox>
+                    <UploadBox htmlFor="arquivo">
+                        {arquivo ? (
+                            <span style={{ fontSize: "14px", color: "#708ef1" }}>
+                                {arquivo.name}
+                            </span>
+                        ) : (
+                            <span style={{ fontSize: "40px", color: "#d3a6b5" }}>⬆</span>
+                        )}
+                    </UploadBox>
                     <Input type="file" id="arquivo" accept="image/*" hidden onChange={handleFileChange} />
                 </Section>
 
@@ -255,14 +261,16 @@ function CadastroBebe() {
 
         {/* LADO DIREITO – IMAGEM */}
         <FundoContainer>
-            <TituloSobreImagem>Cadastro do Bebê</TituloSobreImagem>
-
             <Fundu
                 src={foto}
                 alt="Imagem Bebê"
             />
 
-            <VoltarBtn>Voltar ao início</VoltarBtn>
+            <TituloSobreImagem>Cadastro do Bebê</TituloSobreImagem>
+
+            <VoltarBtn onClick={() => (window.location.href = "/")}>
+                Voltar ao início
+            </VoltarBtn>
         </FundoContainer>
 
     </Container>

@@ -49,3 +49,82 @@ export const Fundula = styled.img`
         height: 100vh;
          z-index: -9999;
 `
+
+// Layout em duas colunas igual ao cadbebe: formulário à esquerda, imagem à direita
+export const Container = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  gap: 0;
+  min-height: 100vh;
+  align-items: stretch;
+
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+export const FormWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px;
+
+  @media (max-width: 900px) {
+    padding: 24px 20px;
+  }
+`;
+
+export const FundoContainer = styled.div`
+  position: relative;
+  width: 100%;
+  height: 100%;
+`;
+
+export const Fundu = styled.img`
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+
+  @media (max-width: 900px) {
+    height: 250px;
+    width: 100%;
+  }
+`;
+
+export const TituloSobreImagem = styled.h1`
+  position: absolute;
+  top: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 42px;
+  color: #ffffff;
+  font-weight: 500;
+  letter-spacing: 2px;
+  text-align: center;
+
+  @media (max-width: 900px) {
+    font-size: 28px;
+  }
+`;
+
+export const VoltarBtn = styled.button`
+  position: absolute;
+  bottom: 24px;
+  right: 24px;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 10px 18px;
+  font-size: 15px;
+  border-radius: 20px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  transition: 0.3s;
+
+  &:hover {
+    background: #8AA9FF;
+    color: #fff;
+  }
+`;
