@@ -17,7 +17,14 @@ import "./video.css";
 export default function VideoCall({
   roomName = "teste3indentity",
   tokenEndpoint = "http://localhost:3030/v1/sosbaby/call/token",
-  authToken = typeof window !== "undefined" ? localStorage.getItem("authToken") : "",
+  authToken = typeof window !== "undefined"
+    ? (
+        localStorage.getItem("token") ||
+        localStorage.getItem("authToken") ||
+        localStorage.getItem("access_token") ||
+        ""
+      )
+    : "",
   useCookies = false,
   onConnected,
   onDisconnected,
@@ -174,31 +181,59 @@ export default function VideoCall({
   const [id_user, nome_user] = (identity || "").split("|");
 
   return (
-     <div className="video-call">
-    <div className="video-pane you">
-      <h3 className="video-title">Você</h3>
-      <div id="local-video" ref={localRef} className="video-box" />
-    </div>
+    <div className="video-call">
+      <div className="video-shell">
+        <div className="video-main">
+          <div className="video-main-inner">
+            <div className="video-main-video" id="remote-video" ref={remoteRef} />
+            <div className="video-main-overlay">
+              <div className="video-main-name">
+                {nome_user || "Dr. Souza"}
+              </div>
+              <div className="video-main-actions">
+                <div className="video-icon-pill video-icon-pill--mic" />
+              </div>
+            </div>
+          </div>
+        </div>
 
-    <div className="video-pane remote">
-      <h3 className="video-title">Remoto</h3>
-      <div id="remote-video" ref={remoteRef} className="video-box" />
-    </div>
+        <div className="video-bottom">
+          <div className="video-self">
+            <div className="video-self-video" id="local-video" ref={localRef} />
+            <div className="video-self-footer">
+              <span className="video-self-name">Você</span>
+            </div>
+          </div>
 
-    <div className="video-status">
-      {loading && <span>Conectando…</span>}
-      {error && <span className="video-error">{error}</span>}
-      {identity && (
-        <span>
-          Conectado como: <strong>{nome_user}</strong> (ID: {id_user})
-        </span>
-      )}
-    </div>
+          <div className="video-controls">
+            <button type="button" className="video-control-btn video-control-btn--secondary">
+              <span className="video-control-icon video-control-icon--audio-off" />
+            </button>
+            <button type="button" className="video-control-btn video-control-btn--secondary">
+              <span className="video-control-icon video-control-icon--video-off" />
+            </button>
+            <button type="button" className="video-control-btn video-control-btn--danger">
+              <span className="video-control-icon video-control-icon--end" />
+            </button>
+            <button type="button" className="video-control-btn video-control-btn--secondary">
+              <span className="video-control-icon video-control-icon--chat" />
+            </button>
+            <button type="button" className="video-control-btn video-control-btn--secondary">
+              <span className="video-control-icon video-control-icon--more" />
+            </button>
+          </div>
+        </div>
 
-    <div className="video-actions">
-      {/* Botões opcionais que posso adicionar depois */}
-      {/* <button className="video-btn">Mutar</button> */}
+        <div className="video-status">
+          {loading && <span>Conectando…</span>}
+          {error && <span className="video-error">{error}</span>}
+          {identity && (
+            <span>
+              Conectado como: <strong>{nome_user}</strong> (ID: {id_user})
+            </span>
+          )}
+        </div>
+      </div>
     </div>
-  </div>
   );
 }

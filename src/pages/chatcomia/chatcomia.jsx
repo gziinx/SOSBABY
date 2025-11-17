@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import "./chatcomia.css";
+import { marked } from "marked";
 
 export default function ChatComIA() {
   const [messages, setMessages] = useState([]);
@@ -14,9 +15,9 @@ export default function ChatComIA() {
 
   // Autenticação (mesmo padrão do video.jsx)
   const authToken = useMemo(
-    () => (typeof window !== "undefined" ? localStorage.getItem("authToken") : ""),
-    []
-  );
+  () => (typeof window !== "undefined" ? localStorage.getItem("token") : ""),
+  []
+);
   const useCookies = false; // ajuste para true se quiser enviar cookies (credentials: 'include')
 
   const userId = useMemo(() => {
@@ -89,9 +90,10 @@ export default function ChatComIA() {
           )}
           {messages.map((m, i) => (
             <div key={i} className={`chat-ia-message ${m.role === "user" ? "user" : "assistant"}`}>
-              <div className="chat-ia-bubble">
-                {m.text}
-              </div>
+              <div
+        className="chat-ia-bubble"
+        dangerouslySetInnerHTML={{ __html: marked.parse(m.text) }}
+          ></div>
             </div>
           ))}
           {loading && (

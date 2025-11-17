@@ -536,7 +536,8 @@ const Rotina = () => {
         </button>
       </div>
 
-      {apiStatus === 'error' && (
+      {/* Erro de API fica apenas em log; não exibimos mais aviso visual na interface */}
+      {false && apiStatus === 'error' && (
         <div className="api-warning">
           ⚠️ Problema de permissão na API: "Acesso negado para esse tipo de usuário" (ID 2, Tipo 3). 
           Exibindo dados de demonstração.

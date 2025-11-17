@@ -132,3 +132,47 @@
   font-size: 13px;
 }
 
+.chat-ia-bubble h1,
+.chat-ia-bubble h2,
+.chat-ia-bubble h3 {
+  margin: 6px 0;
+  font-weight: 600;
+}
+
+.chat-ia-bubble p {
+  margin: 0;
+}
+
+.chat-ia-bubble ul {
+  margin-left: 18px;
+  padding-left: 10px;
+}
+.chat-ia-bubble ol {
+  margin-left: 16px;
+  padding-left: 14px;
+  list-style-type: decimal;
+  color: #1f2937;
+}
+
+.chat-ia-bubble ol li {
+  margin: 4px 0;
+  line-height: 1.4;
+}
+
+.chat-ia-bubble strong {
+  font-weight: 700;
+}
+
+.chat-ia-bubble code {
+  background: #e2e8f0;
+  padding: 2px 5px;
+  border-radius: 6px;
+}
+
+.chat-ia-bubble pre {
+  background: #1e293b;
+  color: white;
+  padding: 10px;
+  border-radius: 10px;
+  overflow-x: auto;
+}
