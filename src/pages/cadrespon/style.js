@@ -9,7 +9,8 @@ export const Container = styled.div`
   margin: 0;
   gap: 0;
   overflow: hidden;
-  min-height: 100vh;
+  height: 100vh;
+  background: #f3f4fb;
 
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
@@ -17,35 +18,40 @@ export const Container = styled.div`
 `;
 
 export const Fundu = styled.img`
+  position: absolute;
+  inset: 0;
   width: 100%;
-  height: auto;
+  height: 100%;
+  object-fit: cover;
   display: block;
-
-  @media (max-width: 768px) {
-    height: 250px;
-    width: 100%;
-  }
 `;
 
 export const Formm = styled.form`
   background: #fff;
-  padding: 40px;
+  padding: 24px 48px 40px 48px;
   width: 100%;
-  overflow-y: auto;
+  max-width: 100%;
+  height: 100vh;
+  border-radius: 0;
+  margin: 0;
+  align-self: stretch;
 
   @media (max-width: 768px) {
-    padding: 25px;
+    padding: 24px;
+    margin: 24px;
+    max-width: 100%;
+    border-radius: 28px;
   }
 `;
 
 export const Section = styled.div`
-  margin-bottom: 20px;
+  margin-bottom: 10px;
 `;
 
 export const Identificacao = styled.h2`
   font-family: "Krona One", sans-serif;
   font-size: 22px;
-  margin: 20px 0 15px;
+  margin: 8px 0 16px;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -119,6 +125,8 @@ export const UploadBox = styled.label`
   justify-content: center;   /* ← garante que fica no meio */
   cursor: pointer;
   transition: 0.3s;
+
+
   background: #fff;
   overflow: hidden;
   text-align: center;
@@ -168,7 +176,6 @@ export const CheckboxItem = styled.div`
 export const BtnContainer = styled.div`
   display: flex;
   justify-content: flex-end;
-  margin-top: 30px;
 
   @media (max-width: 768px) {
     justify-content: center;
@@ -176,17 +183,16 @@ export const BtnContainer = styled.div`
 `;
 
 export const Btn = styled.button`
-  margin-top: 20px;
-  width: 236px;
-  padding: 15px;
+  width: 180px;
+  padding: 16px 24px;
   font-size: 16px;
   background: #708ef1;
-  color: #000;
-  border: 1px solid black;
-  border-radius: 30px;
+  color: #ffffff;
+  border: none;
+  border-radius: 32px;
   font-family: "Krona One", sans-serif;
   cursor: pointer;
-  height: 96px;
+  height: 56px;
   transition: all 0.3s;
 
   &:hover {
@@ -209,18 +215,21 @@ export const Btn = styled.button`
 export const FundoContainer = styled.div`
   position: relative;
   width: 100%;
+  height: 100vh;
+  overflow: hidden;
 `;
 
 export const TituloSobreImagem = styled.h1`
   position: absolute;
-  top: 60px;
+  top: 15%;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translate(-50%, -50%);
   padding: 10px 20px;
-  font-size: 50px;
+  font-size: 36px;
   color: white;
   font-weight: small;
   border-radius: 10px;
+  z-index: 2;
 `;
 
 /* Botão voltar */
@@ -230,8 +239,8 @@ export const VoltarBtn = styled.button`
   left: 20px;
   padding: 10px 18px;
   font-size: 15px;
-  background: rgba(255, 255, 255, 0.85);
-  color: #333;
+  background: transparent;
+  color: #ffffff;
   border: none;
   border-radius: 8px;
   cursor: pointer;
@@ -239,7 +248,6 @@ export const VoltarBtn = styled.button`
   transition: 0.3s;
 
   &:hover {
-    background: #708ef1;
-    color: white;
+    background: rgba(0, 0, 0, 0.25);
   }
 `;
