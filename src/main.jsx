@@ -1,6 +1,7 @@
 import { Suspense, lazy } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { useParams } from "react-router-dom";
 import './pages/Inicio/App.css'
 import Inicio from './pages/Inicio/index'
 import Cadastro from './pages/cadastro/cadastro'
@@ -14,7 +15,8 @@ import Tipo from './pages/tipo/tipo'
 import VideoCall from './pages/video/video'
 import ChatComIA from './pages/chatcomia/chatcomia'
 import Dicas from './pages/dicas/dicas'
-
+import Consulta from './pages/consulta/consulta'
+import CreateCall from './pages/criarconsulta/CreateCall'
 // Lazy load pages to isolate CSS per route
 const Calendarioo = lazy(() => import('./pages/calendario/calendario'))
 const Home = lazy(() => import('./pages/home/home'))
@@ -34,10 +36,23 @@ createRoot(document.getElementById('root')).render(
         <Route path='/rotina' element={<Rotina/>}/>
         <Route path='/tipo' element={<Tipo/>}/>
         <Route path='/homeclinica' element={<HomeClinica/>}/>
-        <Route path='/video' element={<VideoCall/>}/>
+        <Route path="/video/:roomName" element={<VideoPage />} />
         <Route path='/chatcomia' element={<ChatComIA/>}/>
         <Route path='/dicas' element={<Dicas/>}/>
+        <Route path='/consulta' element={<Consulta/>}/>
+        <Route path='/criarconsulta' element={<CreateCall/>}/>  
       </Routes>
     </Suspense>
   </BrowserRouter>
 )
+function VideoPage() {
+  const params = useParams();
+  const room = params.roomName;
+
+  return (
+    <VideoCall
+      roomName={room}
+      tokenEndpoint="https://backend-sosbaby.onrender.com/v1/sosbaby/call/token"
+    />
+  );
+}

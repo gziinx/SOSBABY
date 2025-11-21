@@ -15,7 +15,7 @@ import "./video.css";
  * - onDisconnected?: () => void
  */
 export default function VideoCall({
-  roomName = "teste3indentity",
+  roomName,
   tokenEndpoint = "https://backend-sosbaby.onrender.com/v1/sosbaby/call/token",
   authToken = typeof window !== "undefined"
     ? (
