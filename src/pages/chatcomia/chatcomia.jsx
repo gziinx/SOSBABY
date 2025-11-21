@@ -10,7 +10,7 @@ export default function ChatComIA() {
   const listRef = useRef(null);
 
   const endpoint = useMemo(() => {
-    return "http://localhost:3030/v1/sosbaby/ia/generate/chat";
+    return "https://backend-sosbaby.onrender.com/v1/sosbaby/ia/generate/chat";
   }, []);
 
   // Autenticação (mesmo padrão do video.jsx)

@@ -30,7 +30,7 @@ const navigate = useNavigate();
 
     async function buscarEventos() {
       try {
-        const response = await fetch('http://localhost:3030/v1/sosbaby/calenders');
+        const response = await fetch('https://backend-sosbaby.onrender.com/v1/sosbaby/calenders');
         const data = await response.json();
         if (response.ok && Array.isArray(data.dateCalender)) {
           todosEventos = data.dateCalender;

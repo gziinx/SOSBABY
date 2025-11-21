@@ -146,7 +146,7 @@ const Rotina = () => {
       // Tentar diferentes endpoints para buscar rotinas
       
       // Primeira tentativa: endpoint original
-      let response = await fetch('http://localhost:3030/v1/sosbaby/routineResp', {
+      let response = await fetch('https://backend-sosbaby.onrender.com/v1/sosbaby/routineResp', {
         headers
       });
       
@@ -154,7 +154,7 @@ const Rotina = () => {
       // Se der 404, tentar com ID do usuário
       if (response.status === 404) {
         const userId = getUserIdFromToken();
-        response = await fetch(`http://localhost:3030/v1/sosbaby/routineResp/${userId}`, {
+        response = await fetch(`https://backend-sosbaby.onrender.com/v1/sosbaby/routineResp/${userId}`, {
           headers
         });
       }
@@ -166,7 +166,7 @@ const Rotina = () => {
         // Para cada rotina, buscar seus itens
         const rotinasComItens = await Promise.all(
           rotinasData.map(async (rotina) => {
-            const itemsResponse = await fetch(`http://localhost:3030/v1/sosbaby/routineItem/${rotina.id_rotina}`, {
+            const itemsResponse = await fetch(`https://backend-sosbaby.onrender.com/v1/sosbaby/routineItem/${rotina.id_rotina}`, {
               headers: getAuthHeaders()
             });
             if (itemsResponse.ok) {
@@ -287,7 +287,7 @@ const Rotina = () => {
       }
       
       // Tentar primeiro o endpoint original
-      let itemResponse = await fetch('http://localhost:3030/v1/sosbaby/routineItem/cadastro', {
+      let itemResponse = await fetch('https://backend-sosbaby.onrender.com/v1/sosbaby/routineItem/cadastro', {
         method: 'POST',
         headers,
         body: JSON.stringify(itemData)
@@ -296,7 +296,7 @@ const Rotina = () => {
       
       // Se der 403 ou 404, tentar sem /cadastro
       if (itemResponse.status === 403 || itemResponse.status === 404) {
-        itemResponse = await fetch('http://localhost:3030/v1/sosbaby/routineItem', {
+        itemResponse = await fetch('https://backend-sosbaby.onrender.com/v1/sosbaby/routineItem', {
           method: 'POST',
           headers,
           body: JSON.stringify(itemData)
@@ -334,7 +334,7 @@ const Rotina = () => {
           id_item_rotina: itemId // ID do item criado
         };
         
-        let rotinaResponse = await fetch('http://localhost:3030/v1/sosbaby/routineResp/cadastro', {
+        let rotinaResponse = await fetch('https://backend-sosbaby.onrender.com/v1/sosbaby/routineResp/cadastro', {
           method: 'POST',
           headers: getAuthHeaders(),
           body: JSON.stringify(rotinaResp)
@@ -348,7 +348,7 @@ const Rotina = () => {
             id_user: userId,
             id_item: itemId
           };
-          rotinaResponse = await fetch('http://localhost:3030/v1/sosbaby/routineResp/cadastro', {
+          rotinaResponse = await fetch('https://backend-sosbaby.onrender.com/v1/sosbaby/routineResp/cadastro', {
             method: 'POST',
             headers: getAuthHeaders(),
             body: JSON.stringify(rotinaRespAlt)
@@ -357,7 +357,7 @@ const Rotina = () => {
 
         // Fallback final: tentar endpoint sem /cadastro
         if (!rotinaResponse.ok && (rotinaResponse.status === 400 || rotinaResponse.status === 404)) {
-          rotinaResponse = await fetch('http://localhost:3030/v1/sosbaby/routineResp', {
+          rotinaResponse = await fetch('https://backend-sosbaby.onrender.com/v1/sosbaby/routineResp', {
             method: 'POST',
             headers: getAuthHeaders(),
             body: JSON.stringify(rotinaResp)
@@ -369,7 +369,7 @@ const Rotina = () => {
               id_user: userId,
               id_item: itemId
             };
-            rotinaResponse = await fetch('http://localhost:3030/v1/sosbaby/routineResp', {
+            rotinaResponse = await fetch('https://backend-sosbaby.onrender.com/v1/sosbaby/routineResp', {
               method: 'POST',
               headers: getAuthHeaders(),
               body: JSON.stringify(rotinaRespAlt)
@@ -440,7 +440,7 @@ const Rotina = () => {
   const handleDeleteRotina = async (id) => {
     try {
       // Deletar o item da rotina
-      const itemResponse = await fetch(`http://localhost:3030/v1/sosbaby/routineItem/${id}`, {
+      const itemResponse = await fetch(`https://backend-sosbaby.onrender.com/v1/sosbaby/routineItem/${id}`, {
         method: 'DELETE',
         headers: getAuthHeaders()
       });
@@ -462,7 +462,7 @@ const Rotina = () => {
   const handleEditRotina = async (id, updatedData) => {
     try {
       // Atualizar o item da rotina
-      const itemResponse = await fetch(`http://localhost:3030/v1/sosbaby/routineItem/${id}`, {
+      const itemResponse = await fetch(`https://backend-sosbaby.onrender.com/v1/sosbaby/routineItem/${id}`, {
         method: 'PUT',
         headers: getAuthHeaders(),
         body: JSON.stringify(updatedData)

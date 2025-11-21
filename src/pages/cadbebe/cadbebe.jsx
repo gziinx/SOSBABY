@@ -85,7 +85,7 @@ function CadastroBebe() {
         };
       
         try {
-          const response = await fetch("http://localhost:3030/v1/sosbaby/baby/cadastro", {
+          const response = await fetch("https://backend-sosbaby.onrender.com/v1/sosbaby/baby/cadastro", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(dados),

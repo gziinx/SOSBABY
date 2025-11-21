@@ -25,7 +25,7 @@ export default function Calendarioo() {
 
     async function buscarEventos() {
       try {
-        const response = await fetch('http://localhost:3030/v1/sosbaby/calenders');
+        const response = await fetch('https://backend-sosbaby.onrender.com/v1/sosbaby/calenders');
         const data = await response.json();
 
         if (response.ok && Array.isArray(data.dateCalender)) {
@@ -177,7 +177,7 @@ export default function Calendarioo() {
           const id = e.currentTarget.dataset.id;
           if (confirm('Deseja realmente excluir este evento?')) {
             try {
-              const response = await fetch(`http://localhost:3030/v1/sosbaby/calender/${id}`, { method: 'DELETE' });
+              const response = await fetch(`https://backend-sosbaby.onrender.com/v1/sosbaby/calender/${id}`, { method: 'DELETE' });
               const data = await response.json();
 
               if (response.ok) {
@@ -286,7 +286,7 @@ export default function Calendarioo() {
     async function listarEventosDoDiaAtual() {
       const hoje = new Date().toISOString().split('T')[0];
       try {
-        const response = await fetch('http://localhost:3030/v1/sosbaby/calenders');
+        const response = await fetch('https://backend-sosbaby.onrender.com/v1/sosbaby/calenders');
         const data = await response.json();
         if (response.ok && Array.isArray(data.dateCalender)) {
           const eventosHoje = data.dateCalender.filter(evento => evento.data_calendario.split('T')[0] === hoje);
@@ -421,7 +421,7 @@ export default function Calendarioo() {
         salvarBtn.disabled = true;
         salvarBtn.textContent = 'Salvando...';
 
-        const response = await fetch('http://localhost:3030/v1/sosbaby/calender/cadastro', {
+        const response = await fetch('https://backend-sosbaby.onrender.com/v1/sosbaby/calender/cadastro', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(novoEvento)

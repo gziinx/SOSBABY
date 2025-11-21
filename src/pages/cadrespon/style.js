@@ -29,18 +29,21 @@ export const Fundu = styled.img`
 export const Formm = styled.form`
   background: #fff;
   padding: 24px 48px 40px 48px;
+  display: grid;
   width: 100%;
   max-width: 100%;
-  height: 100vh;
+  min-height: 100vh;  /* Changed from height to min-height */
   border-radius: 0;
   margin: 0;
   align-self: stretch;
+  overflow-y: auto;  /* Add scroll if content is too tall */
+
+  @media (max-width: 1024px) {
+    padding: 24px 24px 40px 24px;
+  }
 
   @media (max-width: 768px) {
-    padding: 24px;
-    margin: 24px;
-    max-width: 100%;
-    border-radius: 28px;
+    padding: 16px;
   }
 `;
 
@@ -106,6 +109,8 @@ export const Input = styled.input`
 
 export const Row = styled.div`
   display: flex;
+  flex-direction: row;
+  justify-content: space-between;
   gap: 40px;
   width: 100%;
 

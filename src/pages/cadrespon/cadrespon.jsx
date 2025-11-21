@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Container,
   Fundu,
@@ -31,6 +31,7 @@ function CadastroRespon() {
   const [segundoResponsavel, setSegundoResponsavel] = useState(false);
   const [arquivoBase64, setArquivoBase64] = useState("");
   const [arquivo, setArquivo] = useState(null);
+  const [userId, setUserId] = useState(null);
 
   // Redimensiona e comprime a imagem antes de enviar
   const handleFileChange = (e) => {
@@ -63,8 +64,28 @@ function CadastroRespon() {
     reader.readAsDataURL(file);
   };
 
+  // Busca o ID do usuário logado ao carregar o componente
+  useEffect(() => {
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      try {
+        const user = JSON.parse(userData);
+        if (user.id_user) {
+          setUserId(user.id_user);
+        }
+      } catch (error) {
+        console.error('Erro ao carregar dados do usuário:', error);
+      }
+    }
+  }, []);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!userId) {
+      alert("Usuário não autenticado. Por favor, faça login novamente.");
+      return;
+    }
 
     if (!arquivoBase64) {
       alert("Selecione uma imagem antes de enviar.");
@@ -76,21 +97,29 @@ function CadastroRespon() {
       data_nascimento: dataNascimento,
       cpf: cpf,
       telefone: telefone,
-      email: email,
-      senha: senha,
       cartao_medico: cartaoMedico,
       cep: cep,
       arquivo: arquivoBase64,
       id_sexo: 1,
-      id_user: 1,
+      id_user: userId,
     };
+    console.log(dados);
 
     try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        alert("Token de autenticação não encontrado. Por favor, faça login novamente.");
+        return;
+      }
+
       const response = await fetch(
-        "http://localhost:3030/v1/sosbaby/resp/cadastro",
+        "https://backend-sosbaby.onrender.com/v1/sosbaby/resp/cadastro",
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
           body: JSON.stringify(dados),
         }
       );
@@ -171,32 +200,6 @@ function CadastroRespon() {
                 value={telefone}
                 onChange={(e) => setTelefone(e.target.value)}
                 placeholder="(00) 00000-0000"
-                required
-              />
-            </InputGroup>
-          </Row>
-
-          <Row>
-            <InputGroup>
-              <label htmlFor="email">E-mail</label>
-              <Input
-                type="email"
-                id="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="exemplo@email.com"
-                required
-              />
-            </InputGroup>
-
-            <InputGroup>
-              <label htmlFor="senha">Senha</label>
-              <Input
-                type="password"
-                id="senha"
-                value={senha}
-                onChange={(e) => setSenha(e.target.value)}
-                placeholder="••••••••"
                 required
               />
             </InputGroup>

@@ -35,7 +35,7 @@ function Login() {
     }
 
     try {
-      const response = await fetch("http://localhost:3030/v1/sosbaby/user/login", {
+      const response = await fetch("https://backend-sosbaby.onrender.com/v1/sosbaby/user/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -85,13 +85,13 @@ function Login() {
       const tipo = resultado.data.tipo_user;
 
       if (tipo === "ADMIN") {
-        navigate("/admin");
+        navigate("/cadclinica");
       } 
       else if (tipo === "Médico") {
         navigate("/cadmedico");
       } 
       else if (tipo === "Responsável") {
-        navigate("/chatcomia");
+        navigate("/cadrespon");
       } 
       else {
         navigate("/");
