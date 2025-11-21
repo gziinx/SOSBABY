@@ -156,7 +156,7 @@ const handleCalendar = () => {
           <div className="nav-center">
             <a href="#">Home</a>
             <a href="" onClick={handleCalendar}>Calendário</a>
-            <a href="#">Dicas</a>
+            <a href="./dicas">Dicas</a>
             <a href="#">Consultas</a>
             <a href="#">Rotina</a>
           </div>

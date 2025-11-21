@@ -106,10 +106,10 @@ const Rotina = () => {
     const userId = getUserIdFromToken();
     
     const endpointsToTest = [
-      'http://localhost:3030/v1/sosbaby/routineResp',
-      `http://localhost:3030/v1/sosbaby/routineResp/${userId}`,
-      'http://localhost:3030/v1/sosbaby/routineItem',
-      `http://localhost:3030/v1/sosbaby/routineItem/${userId}`
+      'https://backend-sosbaby.onrender.com/v1/sosbaby/routineResp',
+      `https://backend-sosbaby.onrender.com/v1/sosbaby/routineResp/${userId}`,
+      'https://backend-sosbaby.onrender.com/v1/sosbaby/routineItem',
+      `https://backend-sosbaby.onrender.com/routineItem/${userId}`
     ];
     
     for (const endpoint of endpointsToTest) {

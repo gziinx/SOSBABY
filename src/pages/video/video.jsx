@@ -16,7 +16,7 @@ import "./video.css";
  */
 export default function VideoCall({
   roomName = "teste3indentity",
-  tokenEndpoint = "http://localhost:3030/v1/sosbaby/call/token",
+  tokenEndpoint = "https://backend-sosbaby.onrender.com/v1/sosbaby/call/token",
   authToken = typeof window !== "undefined"
     ? (
         localStorage.getItem("token") ||
