@@ -70,12 +70,15 @@ export default function VideoCall({
   // Anexa track em um container
   function attachTrack(track, container) {
     try {
+      console.log(`Anexando track ${track.kind} ao container`, container);
       const el = track.attach();
       el.style.maxWidth = "100%";
       el.style.borderRadius = "12px";
+      el.style.objectFit = "cover";
       container.appendChild(el);
-    } catch (_) {
-      // no-op
+      console.log(`Track ${track.kind} anexada com sucesso`);
+    } catch (err) {
+      console.error("Erro ao anexar track:", err);
     }
   }
 
@@ -122,40 +125,61 @@ export default function VideoCall({
           }
         });
 
-       // Participantes já presentes
-connectedRoom.participants.forEach(participant => {
-  participant.tracks.forEach(publication => {
-    // track já ativa
-    if (publication.isSubscribed && publication.track && remoteRef.current) {
-      attachTrack(publication.track, remoteRef.current);
-    }
+        console.log("🚀 Sala conectada com sucesso!");
+        console.log("👥 Participantes presentes:", connectedRoom.participants.size);
 
-    // track ativada depois
-    publication.on("subscribed", track => {
-      if (!remoteRef.current) return;
-      attachTrack(track, remoteRef.current);
-    });
-  });
-});
+        // Participantes já presentes
+        connectedRoom.participants.forEach(participant => {
+          console.log(`👤 Participante presente: ${participant.identity}`);
 
-// Quando alguém novo entra
-connectedRoom.on("participantConnected", participant => {
-  participant.tracks.forEach(publication => {
-    publication.on("subscribed", track => {
-  console.log("📡 TRACK REMOTA RECEBIDA:", track);
-  console.log("📦 remoteRef.current =", remoteRef.current);
+          participant.tracks.forEach(publication => {
+            console.log(`   🔍 Track encontrada: ${publication.kind} (${publication.isSubscribed ? 'inscrita' : 'não inscrita'})`);
 
-  if (!remoteRef.current) {
-    console.warn("❌ remoteRef.current está null — NÃO existe container pra receber o vídeo");
-    return;
-  }
+            // track já ativa
+            if (publication.isSubscribed && publication.track) {
+              console.log(`   🎥 Anexando track ${publication.kind} existente`);
+              if (remoteRef.current) {
+                attachTrack(publication.track, remoteRef.current);
+              } else {
+                console.error("❌ remoteRef.current está nulo ao tentar anexar track existente");
+              }
+            }
 
-  attachTrack(track, remoteRef.current);
-});
-  });
-});
+            // track ativada depois
+            publication.on("subscribed", track => {
+              console.log(`   🎬 Nova track ${track.kind} inscrita`);
+              if (remoteRef.current) {
+                attachTrack(track, remoteRef.current);
+              } else {
+                console.error("❌ remoteRef.current está nulo ao tentar anexar nova track");
+              }
+            });
 
+            publication.on("unsubscribed", track => {
+              console.log(`   🚫 Track ${track.kind} removida`);
+              track.detach().forEach(el => el.remove());
+            });
+          });
+        });
 
+        // Quando alguém novo entra
+        connectedRoom.on("participantConnected", participant => {
+          console.log(`👋 Novo participante conectado: ${participant.identity}`);
+
+          participant.tracks.forEach(publication => {
+            console.log(`   🔔 Nova track disponível: ${publication.kind}`);
+
+            publication.on("subscribed", track => {
+              console.log(`   🎥 Track ${track.kind} do participante ${participant.identity} foi inscrita`);
+              if (remoteRef.current) {
+                console.log("   ✅ Container remoto encontrado, anexando track...");
+                attachTrack(track, remoteRef.current);
+              } else {
+                console.error("❌ ERRO: remoteRef.current é nulo!");
+              }
+            });
+          });
+        });
 
         // Saída de participantes
         connectedRoom.on("participantDisconnected", participant => {
