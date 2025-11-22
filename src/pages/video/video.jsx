@@ -16,7 +16,7 @@ import "./video.css";
  */
 export default function VideoCall({
   roomName,
-  tokenEndpoint = "https://backend-sosbaby.onrender.com/v1/sosbaby/call/token",
+  tokenEndpoint = "http://localhost:3030/v1/sosbaby/call/token",
   authToken = typeof window !== "undefined"
     ? (
         localStorage.getItem("token") ||
@@ -57,7 +57,7 @@ export default function VideoCall({
       }
       const data = await res.json();
       // Esperado: { token: string, indentity: string, Room: string }
-      if (!data?.token) throw new Error("Resposta sem token");
+      if (!data?.token?.token) throw new Error("Resposta sem token JWT");
       return data;
     } catch (err) {
       setError(err?.message || "Erro ao buscar token");
@@ -125,10 +125,18 @@ export default function VideoCall({
       try {
         console.log('🔑 Buscando token...');
         const response = await fetchToken();
-        const { token, indentity, identity: correctIdentity } = response;
-const userIdentity = correctIdentity || indentity || '';
-        console.log('✅ Token obtido para identidade:', userIdentity);
-        setIdentity(userIdentity);
+
+// Agora o backend retorna token.token!
+const jwt = response.token.token;
+const userIdentity = response.token.identity;
+const room = response.token.room;
+
+console.log("TOKEN JWT:", jwt);
+console.log("IDENTITY:", userIdentity);
+console.log("ROOM:", room);
+
+setIdentity(userIdentity);
+
 
         // Cria e mostra as tracks locais ANTES de conectar
         console.log('🎥 Criando tracks locais...');
@@ -164,7 +172,7 @@ const userIdentity = correctIdentity || indentity || '';
         // Conecta usando as tracks locais criadas
         console.log('🌐 Conectando à sala...');
         try {
-          connectedRoom = await Video.connect(token, {
+          connectedRoom = await Video.connect(jwt, {
             name: roomName,
             tracks: localTracks,
             bandwidthProfile: {
@@ -418,13 +426,11 @@ const userIdentity = correctIdentity || indentity || '';
   
 
   // Utilitário: separa identity "id|Nome"
-  const [id_user, nome_user] = (() => {
-  try {
-    const parsed = JSON.parse(identity);
-    return [parsed.id_Usuario, parsed.nome_Usuario];
-  } catch {
-    return ["", ""];
-  }
+const [id_user, nome_user] = (() => {
+  if (typeof identity !== "string") return ["", ""];
+
+  const partes = identity.split("|");
+  return [partes[0] || "", partes[1] || ""];
 })();
 
   return (

@@ -15,7 +15,7 @@ export default function CreateCall() {
 
     try {
       const res = await fetch(
-  "https://backend-sosbaby.onrender.com/v1/sosbaby/chamada/cadastro",
+  "http://localhost:3030/v1/sosbaby/chamada/cadastro",
   {
     method: "POST",
     headers: {
