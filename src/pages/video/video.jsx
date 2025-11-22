@@ -127,10 +127,9 @@ export default function VideoCall({
         const response = await fetchToken();
 
 // Agora o backend retorna token.token!
-const jwt = response.token.token;
-const userIdentity = response.token.identity;
-const room = response.token.room;
-
+const jwt = response.token.token;            // backend retorna só token
+const userIdentity = response.token.indentity 
+const room = response.token.Room 
 console.log("TOKEN JWT:", jwt);
 console.log("IDENTITY:", userIdentity);
 console.log("ROOM:", room);
@@ -427,10 +426,23 @@ setIdentity(userIdentity);
 
   // Utilitário: separa identity "id|Nome"
 const [id_user, nome_user] = (() => {
-  if (typeof identity !== "string") return ["", ""];
+  if (!identity || typeof identity !== "string") {
+    return ["", ""];
+  }
 
-  const partes = identity.split("|");
-  return [partes[0] || "", partes[1] || ""];
+  // Caso a identidade venha no formato "1|Gustavo"
+  if (identity.includes("|")) {
+    const partes = identity.split("|");
+    return [partes[0] || "", partes[1] || ""];
+  }
+
+  // Caso venha como JSON stringificado
+  try {
+    const parsed = JSON.parse(identity);
+    return [parsed.id_Usuario || "", parsed.nome_Usuario || ""];
+  } catch {
+    return ["", ""];
+  }
 })();
 
   return (
