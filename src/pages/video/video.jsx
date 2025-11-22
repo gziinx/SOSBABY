@@ -71,14 +71,37 @@ export default function VideoCall({
   function attachTrack(track, container) {
     try {
       console.log(`Anexando track ${track.kind} ao container`, container);
+      
+      // Limpa o container antes de adicionar um novo vídeo
+      while (container.firstChild) {
+        container.removeChild(container.firstChild);
+      }
+      
       const el = track.attach();
-      el.style.maxWidth = "100%";
-      el.style.borderRadius = "12px";
-      el.style.objectFit = "cover";
+      console.log('Elemento de mídia criado:', el);
+      
+      // Aplica estilos diretamente no elemento de vídeo
+      el.style.width = '100%';
+      el.style.height = '100%';
+      el.style.objectFit = 'cover';
+      el.style.borderRadius = '12px';
+      
+      // Adiciona o elemento ao container
       container.appendChild(el);
-      console.log(`Track ${track.kind} anexada com sucesso`);
+      
+      // Força o redesenho do elemento
+      el.style.display = 'none';
+      el.offsetHeight; // Trigger reflow
+      el.style.display = 'block';
+      
+      console.log(`✅ Track ${track.kind} anexada com sucesso ao container`);
+      
+      // Dispara um evento personalizado para notificar que uma track foi anexada
+      const event = new Event('trackAttached');
+      container.dispatchEvent(event);
+      
     } catch (err) {
-      console.error("Erro ao anexar track:", err);
+      console.error("❌ Erro ao anexar track:", err);
     }
   }
 
@@ -94,29 +117,95 @@ export default function VideoCall({
 
   // Conecta à sala ao montar
   useEffect(() => {
+    console.log('🔵 Iniciando conexão com a sala...');
     let connectedRoom = null;
+    const localTracks = [];
 
     async function connect() {
       try {
-        const { token, indentity } = await fetchToken();
-        setIdentity(indentity || "");
+        console.log('🔑 Buscando token...');
+        const response = await fetchToken();
+        const { token, indentity, identity: correctIdentity } = response;
+const userIdentity = correctIdentity || indentity || '';
+        console.log('✅ Token obtido para identidade:', userIdentity);
+        setIdentity(userIdentity);
 
         // Cria e mostra as tracks locais ANTES de conectar
-        const localTracks = await Video.createLocalTracks({
-          audio: true,
-          video: true,
-        });
-        if (localRef.current) {
-          localTracks.forEach(track => attachTrack(track, localRef.current));
+        console.log('🎥 Criando tracks locais...');
+        try {
+          const tracks = await Video.createLocalTracks({
+            audio: true,
+            video: { 
+              width: 1280, 
+              height: 720,
+              frameRate: 24
+            },
+          });
+          
+          // Armazena as tracks locais para limpeza posterior
+          localTracks.push(...tracks);
+          
+          console.log(`✅ ${tracks.length} tracks locais criadas`);
+          
+          if (localRef.current) {
+            console.log('📌 Anexando tracks locais...');
+            tracks.forEach(track => {
+              console.log(`   Anexando track local ${track.kind}...`);
+              attachTrack(track, localRef.current);
+            });
+          } else {
+            console.error('❌ localRef.current é nulo!');
+          }
+        } catch (error) {
+          console.error('❌ Erro ao criar tracks locais:', error);
+          throw error;
         }
 
         // Conecta usando as tracks locais criadas
-        connectedRoom = await Video.connect(token, {
-          name: roomName,
-          tracks: localTracks,
-        });
-        setRoom(connectedRoom);
-        onConnected?.(connectedRoom);
+        console.log('🌐 Conectando à sala...');
+        try {
+          connectedRoom = await Video.connect(token, {
+            name: roomName,
+            tracks: localTracks,
+            bandwidthProfile: {
+              video: {
+                maxTracks: 5,
+                dominantSpeakerPriority: 'high',
+                renderDimensions: {
+                  high: { width: 1280, height: 720 },
+                  standard: { width: 640, height: 480 },
+                  low: { width: 320, height: 240 }
+                }
+              }
+            },
+            dominantSpeaker: true,
+            networkQuality: { local: 1, remote: 1 },
+            preferredVideoCodecs: [{ codec: 'VP8', simulcast: true }]
+          });
+          
+          console.log('✅ Conectado à sala:', connectedRoom.name);
+          console.log('👤 Participantes na sala:', connectedRoom.participants.size);
+          
+          setRoom(connectedRoom);
+          onConnected?.(connectedRoom);
+          
+          // Log de eventos da sala
+          connectedRoom.on('reconnecting', error => {
+            console.warn('🔄 Reconectando à sala...', error);
+          });
+          
+          connectedRoom.on('reconnected', () => {
+            console.log('✅ Reconexão bem-sucedida');
+          });
+          
+          connectedRoom.on('disconnected', room => {
+            console.log('🚪 Desconectado da sala:', room.name);
+          });
+          
+        } catch (error) {
+          console.error('❌ Erro ao conectar à sala:', error);
+          throw error;
+        }
 
         // Se outras tracks locais forem publicadas posteriormente
         connectedRoom.localParticipant.tracks.forEach(publication => {
@@ -128,56 +217,166 @@ export default function VideoCall({
         console.log("🚀 Sala conectada com sucesso!");
         console.log("👥 Participantes presentes:", connectedRoom.participants.size);
 
-        // Participantes já presentes
+        console.log('👥 Verificando participantes existentes...');
         connectedRoom.participants.forEach(participant => {
-          console.log(`👤 Participante presente: ${participant.identity}`);
-
+          console.log(`👤 Participante já na sala: ${participant.identity} (${participant.sid})`);
+          
+          // Log de todos os tracks disponíveis
+          console.log(`   📊 Tracks publicadas por ${participant.identity}:`, 
+            Array.from(participant.tracks.values()).map(p => ({
+              kind: p.kind,
+              isSubscribed: p.isSubscribed,
+              track: p.track ? 'presente' : 'ausente'
+            }))
+          );
+          
+          // Trata cada track publicada
           participant.tracks.forEach(publication => {
-            console.log(`   🔍 Track encontrada: ${publication.kind} (${publication.isSubscribed ? 'inscrita' : 'não inscrita'})`);
-
-            // track já ativa
+            console.log(`   🔍 Track ${publication.kind} (${publication.trackSid}):`,
+              `isSubscribed=${publication.isSubscribed},`, 
+              `track=${publication.track ? 'presente' : 'ausente'}`);
+            
+            // Se a track já está inscrita e disponível
             if (publication.isSubscribed && publication.track) {
               console.log(`   🎥 Anexando track ${publication.kind} existente`);
               if (remoteRef.current) {
+                console.log('   ✅ Container remoto disponível, anexando track...');
                 attachTrack(publication.track, remoteRef.current);
               } else {
-                console.error("❌ remoteRef.current está nulo ao tentar anexar track existente");
+                console.error("❌ ERRO: remoteRef.current é nulo!");
+                // Tenta novamente após um curto atraso
+                setTimeout(() => {
+                  if (remoteRef.current && publication.track) {
+                    console.log('   🔄 Tentando anexar track novamente...');
+                    attachTrack(publication.track, remoteRef.current);
+                  }
+                }, 1000);
               }
             }
 
             // track ativada depois
             publication.on("subscribed", track => {
+              console.log(`   🎬 Track ${track.kind} do participante ${participant.identity} foi inscrita`);
               console.log(`   🎬 Nova track ${track.kind} inscrita`);
+              console.log('   📝 Detalhes da track:', {
+                id: track.id,
+                kind: track.kind,
+                isEnabled: track.isEnabled,
+                isEnded: track.isEnded,
+                mediaStreamTrack: track.mediaStreamTrack
+              });
+              
               if (remoteRef.current) {
+                console.log('   ✅ Container remoto disponível, anexando track...');
                 attachTrack(track, remoteRef.current);
               } else {
-                console.error("❌ remoteRef.current está nulo ao tentar anexar nova track");
+                console.error("❌ ERRO: remoteRef.current é nulo!");
+                // Tenta novamente após um curto atraso
+                setTimeout(() => {
+                  if (remoteRef.current) {
+                    console.log('   🔄 Tentando anexar track novamente...');
+                    attachTrack(track, remoteRef.current);
+                  }
+                }, 1000);
               }
             });
 
             publication.on("unsubscribed", track => {
               console.log(`   🚫 Track ${track.kind} removida`);
-              track.detach().forEach(el => el.remove());
+              try {
+                track.detach().forEach(el => {
+                  if (el.parentNode) {
+                    el.parentNode.removeChild(el);
+                  }
+                });
+              } catch (error) {
+                console.error('Erro ao remover elementos da track:', error);
+              }
+            });
+            
+            publication.on('publishFailed', error => {
+              console.error(`❌ Falha ao publicar track ${publication.kind}:`, error);
             });
           });
         });
 
         // Quando alguém novo entra
         connectedRoom.on("participantConnected", participant => {
-          console.log(`👋 Novo participante conectado: ${participant.identity}`);
+          console.log(`👋 NOVO PARTICIPANTE CONECTADO: ${participant.identity} (${participant.sid})`);
+          console.log(`   📊 Tracks do participante:`, 
+            Array.from(participant.tracks.values()).map(p => ({
+              kind: p.kind,
+              isSubscribed: p.isSubscribed,
+              track: p.track ? 'presente' : 'ausente'
+            }))
+          );
 
+          // Trata tracks já publicadas
           participant.tracks.forEach(publication => {
-            console.log(`   🔔 Nova track disponível: ${publication.kind}`);
+            console.log(`   🔔 Nova track ${publication.kind} disponível (${publication.trackSid})`);
+            
+            // Se já estiver inscrito e disponível
+            if (publication.isSubscribed && publication.track) {
+              console.log(`   🎥 Track ${publication.kind} já está inscrita`);
+              if (remoteRef.current) {
+                console.log('   ✅ Container remoto disponível, anexando track...');
+                attachTrack(publication.track, remoteRef.current);
+              } else {
+                console.error("❌ ERRO: remoteRef.current é nulo!");
+              }
+            }
 
+            // Quando uma nova track for inscrita
             publication.on("subscribed", track => {
-              console.log(`   🎥 Track ${track.kind} do participante ${participant.identity} foi inscrita`);
+              console.log(`   � Track ${track.kind} do participante ${participant.identity} foi inscrita`);
+              console.log('   📝 Detalhes da track:', {
+                id: track.id,
+                kind: track.kind,
+                isEnabled: track.isEnabled,
+                isEnded: track.isEnded,
+                mediaStreamTrack: track.mediaStreamTrack ? 'presente' : 'ausente'
+              });
+              
               if (remoteRef.current) {
                 console.log("   ✅ Container remoto encontrado, anexando track...");
                 attachTrack(track, remoteRef.current);
               } else {
                 console.error("❌ ERRO: remoteRef.current é nulo!");
+                // Tenta novamente após um curto atraso
+                setTimeout(() => {
+                  if (remoteRef.current) {
+                    console.log('   🔄 Tentando anexar track novamente...');
+                    attachTrack(track, remoteRef.current);
+                  }
+                }, 1000);
               }
             });
+            
+            publication.on('unsubscribed', track => {
+              console.log(`   🚫 Track ${track.kind} do participante ${participant.identity} foi removida`);
+              try {
+                track.detach().forEach(el => {
+                  if (el.parentNode) {
+                    el.parentNode.removeChild(el);
+                  }
+                });
+              } catch (error) {
+                console.error('Erro ao remover elementos da track:', error);
+              }
+            });
+            
+            publication.on('publishFailed', error => {
+              console.error(`❌ Falha ao publicar track ${publication.kind} do participante ${participant.identity}:`, error);
+            });
+          });
+          
+          // Eventos do participante
+          participant.on('trackPublished', publication => {
+            console.log(`   📡 Nova track ${publication.kind} publicada por ${participant.identity}`);
+          });
+          
+          participant.on('trackUnpublished', publication => {
+            console.log(`   🚮 Track ${publication.kind} não publicada mais por ${participant.identity}`);
           });
         });
 
