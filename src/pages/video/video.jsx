@@ -101,7 +101,7 @@ export default function VideoCall({
         // Cria e mostra as tracks locais ANTES de conectar
         const localTracks = await Video.createLocalTracks({
           audio: true,
-          video: { width: 640 },
+          video: true,
         });
         if (localRef.current) {
           localTracks.forEach(track => attachTrack(track, localRef.current));
@@ -122,25 +122,40 @@ export default function VideoCall({
           }
         });
 
-        // Participantes já presentes
-        connectedRoom.participants.forEach(participant => {
-          participant.tracks.forEach(publication => {
-            if (publication.isSubscribed && publication.track && remoteRef.current) {
-              attachTrack(publication.track, remoteRef.current);
-            }
-          });
+       // Participantes já presentes
+connectedRoom.participants.forEach(participant => {
+  participant.tracks.forEach(publication => {
+    // track já ativa
+    if (publication.isSubscribed && publication.track && remoteRef.current) {
+      attachTrack(publication.track, remoteRef.current);
+    }
 
-          participant.on("trackSubscribed", track => {
-            if (remoteRef.current) attachTrack(track, remoteRef.current);
-          });
-        });
+    // track ativada depois
+    publication.on("subscribed", track => {
+      if (!remoteRef.current) return;
+      attachTrack(track, remoteRef.current);
+    });
+  });
+});
 
-        // Novos participantes
-        connectedRoom.on("participantConnected", participant => {
-          participant.on("trackSubscribed", track => {
-            if (remoteRef.current) attachTrack(track, remoteRef.current);
-          });
-        });
+// Quando alguém novo entra
+connectedRoom.on("participantConnected", participant => {
+  participant.tracks.forEach(publication => {
+    publication.on("subscribed", track => {
+  console.log("📡 TRACK REMOTA RECEBIDA:", track);
+  console.log("📦 remoteRef.current =", remoteRef.current);
+
+  if (!remoteRef.current) {
+    console.warn("❌ remoteRef.current está null — NÃO existe container pra receber o vídeo");
+    return;
+  }
+
+  attachTrack(track, remoteRef.current);
+});
+  });
+});
+
+
 
         // Saída de participantes
         connectedRoom.on("participantDisconnected", participant => {
@@ -177,8 +192,17 @@ export default function VideoCall({
     };
   }, [roomName, tokenEndpoint]);
 
+  
+
   // Utilitário: separa identity "id|Nome"
-  const [id_user, nome_user] = (identity || "").split("|");
+  const [id_user, nome_user] = (() => {
+  try {
+    const parsed = JSON.parse(identity);
+    return [parsed.id_Usuario, parsed.nome_Usuario];
+  } catch {
+    return ["", ""];
+  }
+})();
 
   return (
     <div className="video-call">
