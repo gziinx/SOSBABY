@@ -54,7 +54,8 @@
 .video-main-video canvas {
   width: 100% !important;
   height: 100% !important;
-  object-fit: cover;
+  object-fit: contain;
+  background: black;
   position: absolute;
   top: 0;
   left: 0;

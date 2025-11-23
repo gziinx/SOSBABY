@@ -34,6 +34,7 @@ export default function VideoCall({
 
   const [room, setRoom] = useState(null);
   const [identity, setIdentity] = useState("");
+  const [remoteParticipant, setRemoteParticipant] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -99,6 +100,11 @@ export default function VideoCall({
       // Dispara um evento personalizado para notificar que uma track foi anexada
       const event = new Event('trackAttached');
       container.dispatchEvent(event);
+      if (track.kind === "audio") {
+  console.log("🔊 Áudio remoto recebido — anexando");
+}
+el.autoplay = true;
+el.muted = false;
       
     } catch (err) {
       console.error("❌ Erro ao anexar track:", err);
@@ -143,9 +149,12 @@ setIdentity(userIdentity);
   const tracks = await Video.createLocalTracks({
     audio: true,
     video: { 
-      width: 1280, 
-      height: 720,
-      frameRate: 24
+      width: { ideal: 1280 },
+      height: { ideal: 720 },
+      frameRate: 24,
+      aspectRatio: 16/9,
+      facingMode: 'user',
+      zoom: false
     },
   });
 
@@ -324,6 +333,8 @@ setIdentity(userIdentity);
         // Quando alguém novo entra
         connectedRoom.on("participantConnected", participant => {
           console.log(`👋 NOVO PARTICIPANTE CONECTADO: ${participant.identity} (${participant.sid})`);
+          // Atualiza o participante remoto quando alguém se conecta
+          setRemoteParticipant(participant);
           console.log(`   📊 Tracks do participante:`, 
             Array.from(participant.tracks.values()).map(p => ({
               kind: p.kind,
@@ -404,6 +415,8 @@ setIdentity(userIdentity);
         // Saída de participantes
         connectedRoom.on("participantDisconnected", participant => {
           detachParticipantTracks(participant);
+          // Limpa o participante remoto quando desconecta
+          setRemoteParticipant(null);
         });
       } catch (_) {
         // erro já tratado em fetchToken ou logado
@@ -467,7 +480,13 @@ const [id_user, nome_user] = (() => {
             <div className="video-main-video" id="remote-video" ref={remoteRef} />
             <div className="video-main-overlay">
               <div className="video-main-name">
-                {nome_user || "Dr. Souza"}
+                {remoteParticipant ? 
+                  (() => {
+                    // Extrai apenas o nome se estiver no formato "id|Nome"
+                    const parts = remoteParticipant.identity.split('|');
+                    return parts.length > 1 ? parts[1] : remoteParticipant.identity;
+                  })() 
+                  : (nome_user || "Aguardando participante...")}
               </div>
               <div className="video-main-actions">
                 <div className="video-icon-pill video-icon-pill--mic" />
