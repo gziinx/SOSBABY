@@ -488,16 +488,6 @@ const [id_user, nome_user] = (() => {
   }
 })();
 
-const startAudio = () => {
-  // Tenta tocar todos os áudios remotos já anexados
-  const audios = document.querySelectorAll("audio");
-  audios.forEach(a => {
-    a.play().catch(() => {
-      console.warn("⚠️ Autoplay bloqueado pelo navegador");
-    });
-  });
-};
-
 
   return (
     <div className="video-call">
@@ -529,7 +519,6 @@ const startAudio = () => {
               <span className="video-self-name">Você</span>
             </div>
           </div>
-          <button onClick={startAudio}>Ativar áudio</button>
 
           <div className="video-controls">
             <button type="button" className="video-control-btn video-control-btn--secondary">
