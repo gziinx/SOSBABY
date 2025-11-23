@@ -57,7 +57,7 @@ export default function VideoCall({
       }
       const data = await res.json();
       // Esperado: { token: string, indentity: string, Room: string }
-      if (!data?.token?.token) throw new Error("Resposta sem token JWT");
+      if (!data?.token) throw new Error("Resposta sem token JWT");
       return data;
     } catch (err) {
       setError(err?.message || "Erro ao buscar token");
@@ -127,9 +127,9 @@ export default function VideoCall({
         const response = await fetchToken();
 
 // Agora o backend retorna token.token!
-const jwt = response.token.token;            // backend retorna só token
-const userIdentity = response.token.indentity 
-const room = response.token.Room 
+const jwt = response.token.token;   // backend retorna só token
+const userIdentity = response.token.identity
+const room = response.token.room
 console.log("TOKEN JWT:", jwt);
 console.log("IDENTITY:", userIdentity);
 console.log("ROOM:", room);
@@ -138,35 +138,49 @@ setIdentity(userIdentity);
 
 
         // Cria e mostra as tracks locais ANTES de conectar
-        console.log('🎥 Criando tracks locais...');
-        try {
-          const tracks = await Video.createLocalTracks({
-            audio: true,
-            video: { 
-              width: 1280, 
-              height: 720,
-              frameRate: 24
-            },
-          });
-          
-          // Armazena as tracks locais para limpeza posterior
-          localTracks.push(...tracks);
-          
-          console.log(`✅ ${tracks.length} tracks locais criadas`);
-          
-          if (localRef.current) {
-            console.log('📌 Anexando tracks locais...');
-            tracks.forEach(track => {
-              console.log(`   Anexando track local ${track.kind}...`);
-              attachTrack(track, localRef.current);
-            });
-          } else {
-            console.error('❌ localRef.current é nulo!');
-          }
-        } catch (error) {
-          console.error('❌ Erro ao criar tracks locais:', error);
-          throw error;
-        }
+      try {
+  // ---- Tentativa 1: vídeo + áudio ----
+  const tracks = await Video.createLocalTracks({
+    audio: true,
+    video: { 
+      width: 1280, 
+      height: 720,
+      frameRate: 24
+    },
+  });
+
+  localTracks.push(...tracks);
+  console.log(`✅ ${tracks.length} tracks locais criadas`);
+
+  if (localRef.current) {
+    console.log('📌 Anexando tracks locais...');
+    tracks.forEach(track => {
+      console.log(`   Anexando track local ${track.kind}...`);
+      attachTrack(track, localRef.current);
+    });
+  } else {
+    console.error('❌ localRef.current é nulo!');
+  }
+
+} catch (errVideo) {
+  console.warn("⚠️ Sem webcam disponível. Tentando criar track somente de áudio...", errVideo);
+
+  try {
+    // ---- Tentativa 2: somente áudio ----
+    const tracks = await Video.createLocalTracks({
+      audio: true,
+      video: false
+    });
+
+    localTracks.push(...tracks);
+    console.log("🎤 Track de áudio criada (sem vídeo)");
+
+  } catch (errAudio) {
+    console.warn("⚠️ Nem áudio disponível. Conectando sem mídia...", errAudio);
+    // ---- Tentativa 3: nenhuma mídia ----
+    localTracks.length = 0;
+  }
+}
 
         // Conecta usando as tracks locais criadas
         console.log('🌐 Conectando à sala...');
