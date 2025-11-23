@@ -412,6 +412,21 @@ setIdentity(userIdentity);
           });
         });
 
+        participant.on("trackSubscribed", (track) => {
+  if (track.kind === "audio") {
+    const audio = track.attach(); // Twilio já cria o <audio>
+    audio.autoplay = true;
+    audio.muted = false;       // garante que não está mudo
+    audio.volume = 1;          // volume máximo
+    remoteRef.current.appendChild(audio);
+
+    // Forçar play para contornar bloqueio de autoplay
+    audio.play().catch(e => {
+      console.warn("⚠️ Navegador bloqueou autoplay do áudio remoto:", e);
+    });
+  }
+});
+
         // Saída de participantes
         connectedRoom.on("participantDisconnected", participant => {
           detachParticipantTracks(participant);
@@ -422,6 +437,7 @@ setIdentity(userIdentity);
         // erro já tratado em fetchToken ou logado
       }
     }
+    
 
     connect();
 
@@ -472,6 +488,17 @@ const [id_user, nome_user] = (() => {
   }
 })();
 
+const startAudio = () => {
+  // Tenta tocar todos os áudios remotos já anexados
+  const audios = document.querySelectorAll("audio");
+  audios.forEach(a => {
+    a.play().catch(() => {
+      console.warn("⚠️ Autoplay bloqueado pelo navegador");
+    });
+  });
+};
+
+
   return (
     <div className="video-call">
       <div className="video-shell">
@@ -502,6 +529,7 @@ const [id_user, nome_user] = (() => {
               <span className="video-self-name">Você</span>
             </div>
           </div>
+          <button onClick={startAudio}>Ativar áudio</button>
 
           <div className="video-controls">
             <button type="button" className="video-control-btn video-control-btn--secondary">
