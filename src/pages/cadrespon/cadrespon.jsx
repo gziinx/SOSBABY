@@ -24,15 +24,12 @@ function CadastroRespon() {
   const [dataNascimento, setDataNascimento] = useState("");
   const [cpf, setCpf] = useState("");
   const [telefone, setTelefone] = useState("");
-  const [email, setEmail] = useState("");
-  const [senha, setSenha] = useState("");
-  const [cartaoMedico, setCartaoMedico] = useState("");
   const [cep, setCep] = useState("");
-  const [segundoResponsavel, setSegundoResponsavel] = useState(false);
   const [arquivoBase64, setArquivoBase64] = useState("");
   const [arquivo, setArquivo] = useState(null);
   const [userId, setUserId] = useState(null);
-
+  const [nomeConvenio, setNomeConvenio] = useState("");
+const [idConvenio, setIdConvenio] = useState("");
   // Redimensiona e comprime a imagem antes de enviar
   const handleFileChange = (e) => {
     const file = e.target.files?.[0];
@@ -57,12 +54,49 @@ function CadastroRespon() {
           ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
           const resizedBase64 = canvas.toDataURL("image/jpeg", 0.7);
-          setArquivoBase64(resizedBase64);
+          setArquivoBase64(resizedBase64.split(",")[1]);
+
         }
       };
     };
     reader.readAsDataURL(file);
   };
+
+  const cadastrarConvenio = async () => {
+    if (!nomeConvenio.trim()) {
+      alert("Digite o nome do convênio antes.");
+      return;
+    }
+  
+    try {
+      const response = await fetch(
+        "https://backend-sosbaby.onrender.com/v1/sosbaby/convenio/cadastro",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ nome: nomeConvenio })
+        }
+      );
+  
+      const data = await response.json();
+      console.log("Convênio criado:", data);
+  
+      if (response.ok) {
+        alert("Convênio criado com sucesso!");
+        // supondo que backend retorne { id_convenio: 5 }
+        setIdConvenio(data.data.id_convenio);
+      } else {
+        alert(data.message || "Erro ao cadastrar convênio.");
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Erro ao cadastrar convênio.");
+    }
+  };
+  
+
 
   // Busca o ID do usuário logado ao carregar o componente
   useEffect(() => {
@@ -97,11 +131,12 @@ function CadastroRespon() {
       data_nascimento: dataNascimento,
       cpf: cpf,
       telefone: telefone,
-      cartao_medico: cartaoMedico,
       cep: cep,
       arquivo: arquivoBase64,
       id_sexo: 1,
       id_user: userId,
+      id_convenio: Number(idConvenio),
+
     };
     console.log(dados);
 
@@ -221,6 +256,35 @@ function CadastroRespon() {
               required
             />
           </InputGroup>
+          <InputGroup>
+  <label htmlFor="nomeConvenio">Nome do Convênio</label>
+  <Input
+    type="text"
+    id="nomeConvenio"
+    value={nomeConvenio}
+    onChange={(e) => setNomeConvenio(e.target.value)}
+    placeholder="Ex: Unimed"
+  />
+</InputGroup>
+
+<Btn
+  type="button"
+  onClick={cadastrarConvenio}
+  style={{ marginTop: "10px" }}
+>
+  Criar Convênio
+</Btn>
+
+<InputGroup>
+  <label htmlFor="idConvenio">ID do Convênio (gerado automaticamente)</label>
+  <Input
+  type="number"
+  id="idConvenio"
+  value={idConvenio}
+  readOnly
+/>
+</InputGroup>
+
 
           <InputGroup>
             <label htmlFor="cep">CEP</label>
@@ -234,7 +298,7 @@ function CadastroRespon() {
             />
           </InputGroup>
         </Section>
-
+      
         {/* Upload */}
         <Section>
           <Identificacao icon="📤">Upload de Arquivos</Identificacao>
@@ -260,17 +324,7 @@ function CadastroRespon() {
             />
           </InputGroup>
 
-          <CheckboxItem>
-            <Input
-              type="checkbox"
-              id="segundoResponsavel"
-              checked={segundoResponsavel}
-              onChange={(e) => setSegundoResponsavel(e.target.checked)}
-            />
-            <label htmlFor="segundoResponsavel">
-              Adicionar segundo responsável
-            </label>
-          </CheckboxItem>
+         
         </Section>
 
         {/* Botão */}
