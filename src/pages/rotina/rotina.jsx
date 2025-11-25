@@ -8,10 +8,12 @@ const Rotina = () => {
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({
     titulo: '',
+    cor: '#000000',
+    id_user: '',
+    titulo_item: '',
     descricao: '',
-    data_rotina: '',
     hora: '',
-    cor: '#6366f1'
+    data_rotina: ''
   });
   const [apiStatus, setApiStatus] = useState('loading'); // 'loading', 'error', 'success'
 
@@ -142,104 +144,42 @@ const Rotina = () => {
     setLoading(true);
     try {
       const headers = getAuthHeaders();
+      const userId = getUserIdFromToken();
+      const url = `https://backend-sosbaby.onrender.com/v1/sosbaby/viewRoutines?id_user=${userId}`;
       
-      // Tentar diferentes endpoints para buscar rotinas
-      
-      // Primeira tentativa: endpoint original
-      let response = await fetch('https://backend-sosbaby.onrender.com/v1/sosbaby/routineResp', {
+      // Buscar rotinas
+      const response = await fetch(url, {
+        method: 'GET',
         headers
       });
       
-      
-      // Se der 404, tentar com ID do usuário
-      if (response.status === 404) {
-        const userId = getUserIdFromToken();
-        response = await fetch(`https://backend-sosbaby.onrender.com/v1/sosbaby/routineResp/${userId}`, {
-          headers
-        });
-      }
-      
-      
       if (response.ok) {
-        const rotinasData = await response.json();
+        const responseData = await response.json();
         
-        // Para cada rotina, buscar seus itens
-        const rotinasComItens = await Promise.all(
-          rotinasData.map(async (rotina) => {
-            const itemsResponse = await fetch(`https://backend-sosbaby.onrender.com/v1/sosbaby/routineItem/${rotina.id_rotina}`, {
-              headers: getAuthHeaders()
-            });
-            if (itemsResponse.ok) {
-              const items = await itemsResponse.json();
-              return { ...rotina, items };
-            }
-            return { ...rotina, items: [] };
-          })
-        );
-        
-        setRotinas(rotinasComItens);
-        setApiStatus('success');
+        // Verificar se a resposta tem a estrutura esperada
+        if (responseData && Array.isArray(responseData.data)) {
+          // Filtrar rotinas pelo ID do usuário logado
+          const userRotinas = responseData.data.filter(rotina => 
+            rotina.id_user && rotina.id_user.toString() === userId.toString()
+          );
+          
+          setRotinas(userRotinas);
+          setApiStatus('success');
+        } else {
+          console.error('Formato de resposta inesperado:', responseData);
+          setApiStatus('error');
+        }
       } else {
         setApiStatus('error');
-        // Tentar ler a mensagem de erro da API
         try {
           const errorData = await response.text();
           console.error('Erro da API:', response.status, errorData);
         } catch (e) {
           console.error('Erro ao ler resposta de erro:', e);
         }
-        
-        // Mock data para demonstração se a API não estiver disponível
-        
-        setRotinas([
-          {
-            id_item: 1,
-            titulo: "Mamadeira da manhã",
-            descricao: "Primeira mamadeira do dia",
-            data_rotina: "2024-11-11",
-            hora: "07:00",
-            cor: "#ff6b6b"
-          },
-          {
-            id_item: 2,
-            titulo: "Soneca da tarde",
-            descricao: "Descanso após o almoço",
-            data_rotina: "2024-11-11",
-            hora: "14:00",
-            cor: "#4ecdc4"
-          },
-          {
-            id_item: 3,
-            titulo: "Medicamento",
-            descricao: "Vitamina D",
-            data_rotina: "2024-11-11",
-            hora: "18:00",
-            cor: "#51cf66"
-          }
-        ]);
       }
     } catch (error) {
       console.error('Erro ao buscar rotinas:', error);
-      setApiStatus('error');
-      // Mock data em caso de erro
-      setRotinas([
-        {
-          id_item: 1,
-          titulo: "Mamadeira da manhã",
-          descricao: "Primeira mamadeira do dia",
-          data_rotina: "2024-11-11",
-          hora: "07:00",
-          cor: "#ff6b6b"
-        },
-        {
-          id_item: 2,
-          titulo: "Soneca da tarde",
-          descricao: "Descanso após o almoço",
-          data_rotina: "2024-11-11",
-          hora: "14:00",
-          cor: "#4ecdc4"
-        }
-      ]);
     } finally {
       setLoading(false);
     }
@@ -253,222 +193,103 @@ const Rotina = () => {
     }
   };
 
-  const handleFormSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    
-    try {
-      const headers = getAuthHeaders();
-      
-      // Primeiro criar o item da rotina
-      // Verificar se todos os campos obrigatórios estão preenchidos
-      if (!formData.titulo || !formData.data_rotina || !formData.hora) {
-        console.error('Campos obrigatórios não preenchidos');
-        alert('Por favor, preencha todos os campos obrigatórios!');
-        return;
-      }
-      
-      // Tentar incluir id_user no item também (pode ser obrigatório)
-      const userId = getUserIdFromToken();
-      const itemData = {
-        titulo: formData.titulo,
-        descricao: formData.descricao || '', // Garantir que não seja undefined
-        data_rotina: formData.data_rotina,
-        hora: formData.hora,
-        id_user: userId // Adicionar ID do usuário
-      };
-      
-      // Decodificar o token para ver os dados do usuário (silencioso)
-      const tokenPayload = getTokenPayload();
-      if (tokenPayload?.exp) {
-        const now = Math.floor(Date.now() / 1000);
-        const isExpired = now > tokenPayload.exp;
-        // silencioso
-      }
-      
-      // Tentar primeiro o endpoint original
-      let itemResponse = await fetch('https://backend-sosbaby.onrender.com/v1/sosbaby/routineItem/cadastro', {
+  const handleSubmit = async (e) => {
+  e.preventDefault();
+  setLoading(true);
+
+  try {
+    const userId = getUserIdFromToken();
+
+const rotinaData = {
+  titulo_rotina: formData.titulo_item,
+  titulo_item: formData.titulo_item,
+  descricao: formData.descricao,
+  data_rotina: formData.data_rotina,
+  hora: formData.hora,
+  cor: formData.cor,
+  id_user: userId
+};
+console.log(rotinaData)
+    const response = await fetch(
+      'https://backend-sosbaby.onrender.com/v1/sosbaby/RelacionamentoRotina/cadastro',
+      {
         method: 'POST',
-        headers,
-        body: JSON.stringify(itemData)
-      });
-      
-      
-      // Se der 403 ou 404, tentar sem /cadastro
-      if (itemResponse.status === 403 || itemResponse.status === 404) {
-        itemResponse = await fetch('https://backend-sosbaby.onrender.com/v1/sosbaby/routineItem', {
-          method: 'POST',
-          headers,
-          body: JSON.stringify(itemData)
-        });
-      }
-      
-      
-      if (itemResponse.ok) {
-        const itemCreated = await itemResponse.json();
-        
-        // Pegar o ID do usuário do token JWT
-        const userId = getUserIdFromToken();
-        
-        // Depois criar a rotina do responsável usando o ID do item criado
-        // Garantir que a cor esteja no formato "#000000"
-        let corFormatada = formData.cor;
-        if (!corFormatada.startsWith('#')) {
-          corFormatada = '#' + corFormatada;
-        }
-        
-        // Extrair ID do item criado considerando diferentes formatos de resposta
-        const itemId = (
-          itemCreated?.id_item ??
-          itemCreated?.id ??
-          itemCreated?.item?.id ??
-          itemCreated?.insertId ??
-          itemCreated?.data?.id_item ??
-          itemCreated?.data?.id
-        );
-        
-        const rotinaResp = {
-          titulo: formData.titulo,
-          cor: corFormatada, // Cor no formato "#000000"
-          id_user: userId,
-          id_item_rotina: itemId // ID do item criado
-        };
-        
-        let rotinaResponse = await fetch('https://backend-sosbaby.onrender.com/v1/sosbaby/routineResp/cadastro', {
-          method: 'POST',
-          headers: getAuthHeaders(),
-          body: JSON.stringify(rotinaResp)
-        });
-        
-        // Fallback: alguns backends podem esperar "id_item" ao invés de "id_item_rotina"
-        if (!rotinaResponse.ok && (rotinaResponse.status === 400 || rotinaResponse.status === 404)) {
-          const rotinaRespAlt = {
-            titulo: formData.titulo,
-            cor: corFormatada,
-            id_user: userId,
-            id_item: itemId
-          };
-          rotinaResponse = await fetch('https://backend-sosbaby.onrender.com/v1/sosbaby/routineResp/cadastro', {
-            method: 'POST',
-            headers: getAuthHeaders(),
-            body: JSON.stringify(rotinaRespAlt)
-          });
-        }
+        headers: getAuthHeaders(), // já inclui Bearer token
+        body: JSON.stringify(rotinaData)
 
-        // Fallback final: tentar endpoint sem /cadastro
-        if (!rotinaResponse.ok && (rotinaResponse.status === 400 || rotinaResponse.status === 404)) {
-          rotinaResponse = await fetch('https://backend-sosbaby.onrender.com/v1/sosbaby/routineResp', {
-            method: 'POST',
-            headers: getAuthHeaders(),
-            body: JSON.stringify(rotinaResp)
-          });
-          if (!rotinaResponse.ok) {
-            const rotinaRespAlt = {
-              titulo: formData.titulo,
-              cor: corFormatada,
-              id_user: userId,
-              id_item: itemId
-            };
-            rotinaResponse = await fetch('https://backend-sosbaby.onrender.com/v1/sosbaby/routineResp', {
-              method: 'POST',
-              headers: getAuthHeaders(),
-              body: JSON.stringify(rotinaRespAlt)
-            });
-          }
-        }
         
-        if (rotinaResponse.ok) {
-          const rotinaCreated = await rotinaResponse.json();
-          // Recarregar a lista de rotinas
-          fetchRotinas();
-        } else {
-          // Tentar ler a mensagem de erro
-          try {
-            const errorData = await rotinaResponse.text();
-            console.error('Erro ao criar rotina:', rotinaResponse.status, errorData);
-          } catch (e) {
-            console.error('Erro ao ler resposta de erro da rotina:', e);
-          }
-        }
-      } else {
-        // Tentar ler a mensagem de erro do POST item
-        try {
-          const errorData = await itemResponse.text();
-          console.error('Erro ao criar item:', itemResponse.status, errorData);
-        } catch (e) {
-          console.error('Erro ao ler resposta de erro do item:', e);
-        }
-        
-        // Mock - adicionar à lista local se a API não estiver disponível
-        const newRotina = {
-          id_item: Date.now(),
-          ...formData
-        };
-        setRotinas([...rotinas, newRotina]);
       }
-      
-      setFormData({
-        titulo: '',
-        descricao: '',
-        data_rotina: '',
-        hora: '',
-        cor: '#6366f1'
-      });
-      setShowForm(false);
-    } catch (error) {
-      console.error('Erro ao criar rotina:', error);
-      // Mock - adicionar à lista local em caso de erro
-      const newRotina = {
-        id_item: Date.now(),
-        ...formData
-      };
-      setRotinas([...rotinas, newRotina]);
-      
-      setFormData({
-        titulo: '',
-        descricao: '',
-        data_rotina: '',
-        hora: '',
-        cor: '#6366f1'
-      });
-      setShowForm(false);
-    } finally {
-      setLoading(false);
+    );
+
+    const responseData = await response.json();
+
+    if (!response.ok) {
+      console.error('Erro na criação da rotina:', responseData);
+      throw new Error(responseData.message || 'Erro ao criar rotina');
     }
-  };
 
-  const handleDeleteRotina = async (id) => {
+    console.log('Rotina criada com sucesso:', responseData);
+
+    // Atualizar lista
+    fetchRotinas();
+
+    // Resetar form
+    setFormData({
+      titulo_item: '',
+      descricao: '',
+      data_rotina: '',
+      hora: '',
+      cor: '#6366f1'
+    });
+    setShowForm(false);
+
+    alert('Rotina criada com sucesso!');
+  } catch (error) {
+    console.error('Erro ao criar rotina:', error);
+    alert(`Erro ao criar rotina: ${error.message || 'Tente novamente mais tarde'}`);
+  } finally {
+    setLoading(false);
+  }
+};
+
+  const handleDelete = async (id) => {
+    // Verificar confirmação do usuário
+    const confirmDelete = window.confirm('Tem certeza que deseja excluir esta rotina? Esta ação não pode ser desfeita.');
+    
+    if (!confirmDelete) {
+      return; // Usuário cancelou a exclusão
+    }
+
     try {
-      // Deletar o item da rotina
-      const itemResponse = await fetch(`https://backend-sosbaby.onrender.com/v1/sosbaby/routineItem/${id}`, {
+      const response = await fetch(`https://backend-sosbaby.onrender.com/v1/sosbaby/routineResp/${id}`, {
         method: 'DELETE',
         headers: getAuthHeaders()
       });
       
-      if (itemResponse.ok) {
-        // Recarregar a lista de rotinas
-        fetchRotinas();
+      if (response.ok) {
+        // Atualizar o estado local apenas após confirmação do servidor
+        setRotinas(prevRotinas => prevRotinas.filter(rotina => rotina.id_item !== id));
       } else {
-        // Mock - remover da lista local se a API não estiver disponível
-        setRotinas(rotinas.filter(rotina => rotina.id_item !== id));
+        // Se a API retornar erro, mostrar mensagem
+        const errorData = await response.json().catch(() => ({}));
+        console.error('Erro ao deletar rotina:', errorData);
+        alert('Não foi possível excluir a rotina. Tente novamente mais tarde.');
       }
     } catch (error) {
       console.error('Erro ao deletar rotina:', error);
-      // Mock - remover da lista local em caso de erro
-      setRotinas(rotinas.filter(rotina => rotina.id_item !== id));
+      alert('Ocorreu um erro ao se comunicar com o servidor. Verifique sua conexão e tente novamente.');
     }
   };
 
-  const handleEditRotina = async (id, updatedData) => {
+  const handleEdit = async (id, updatedData) => {
     try {
-      // Atualizar o item da rotina
-      const itemResponse = await fetch(`https://backend-sosbaby.onrender.com/v1/sosbaby/routineItem/${id}`, {
+      const response = await fetch(`https://backend-sosbaby.onrender.com/v1/sosbaby/routineItem/${id}`, {
         method: 'PUT',
         headers: getAuthHeaders(),
         body: JSON.stringify(updatedData)
       });
       
-      if (itemResponse.ok) {
+      if (response.ok) {
         // Recarregar a lista de rotinas
         fetchRotinas();
       } else {
@@ -548,20 +369,20 @@ const Rotina = () => {
 
       {showForm && (
         <div className="form-overlay">
-          <form className="rotina-form" onSubmit={handleFormSubmit}>
+          <form className="rotina-form" onSubmit={handleSubmit}>
             <h2>Nova Rotina</h2>
             
             <input
               type="text"
               placeholder="Título da rotina"
-              value={formData.titulo}
-              onChange={(e) => setFormData({...formData, titulo: e.target.value})}
+              value={formData.titulo_item || ''}
+              onChange={(e) => setFormData({ ...formData, titulo_item: e.target.value })}
               required
             />
             
             <textarea
               placeholder="Descrição"
-              value={formData.descricao}
+              value={formData.descricao || ''}
               onChange={(e) => setFormData({...formData, descricao: e.target.value})}
             />
             
@@ -634,7 +455,7 @@ const Rotina = () => {
                 </button>
                 <button 
                   className="delete-btn"
-                  onClick={() => handleDeleteRotina(rotina.id_item)}
+                  onClick={() => handleDelete(rotina.id_item)}
                 >
                   🗑️
                 </button>
