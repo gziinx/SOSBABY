@@ -145,6 +145,12 @@ const navigate = useNavigate();
 const handleCalendar = () => {
     navigate('/calendario');
   };
+const handleDica = () => {
+    navigate('/dicasclinica');
+  };
+  const handleCriar = () => {
+    navigate('/criarconsulta');
+  };
 
   return (
     <>
@@ -156,9 +162,8 @@ const handleCalendar = () => {
           <div className="nav-center">
             <a href="#">Home</a>
             <a href="" onClick={handleCalendar}>Calendário</a>
-            <a href="#">Dicas</a>
-            <a href="#">Consultas</a>
-            <a href="#">Rotina</a>
+            <a href="" onClick={handleDica}>Dicas</a>
+            <a href="" onClick={handleCriar}>Consultas</a>
           </div>
           <div className="nav-right">
             <i data-lucide="bell" className="icon"></i>
