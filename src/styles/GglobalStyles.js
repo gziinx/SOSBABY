@@ -1,5 +1,21 @@
 import { createGlobalStyle } from "styled-components";
+export const PerfilStyle = createGlobalStyle`
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Krona One', sans-serif;
+}
 
+body {
+    background-color: #708EF1;
+    background-size: cover;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+}
+`
 export const GlobalStyle = createGlobalStyle`
     *{
         margin: 0;

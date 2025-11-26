@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import './perfil.css';
 import bebe from '../../assets/bebe.png';
 import logo from '../../assets/logoo.png';
-
+import { PerfilStyle } from '../../styles/GglobalStyles';
 const Perfil = () => {
   const navigate = useNavigate();
 
@@ -38,8 +38,9 @@ const Perfil = () => {
   };
 
   return (
-    <div className="perfil-container">
-      
+    <>
+      <PerfilStyle/>
+      <header>
         <nav className="nav">
           <div className="nav-left">
             <img src={logo} alt="SOS Baby" className="logu" />
@@ -58,6 +59,7 @@ const Perfil = () => {
             <i data-lucide="user" className="icon user-icon"></i>
           </div>
         </nav>
+        </header>
       <div className="container">
         <div className="header">
           <h2>Perfil do Responsável</h2>
@@ -111,7 +113,7 @@ const Perfil = () => {
 
         <button className="bore" type="submit">Salvar</button>
       </div>
-    </div>
+    </>
   );
 };
 

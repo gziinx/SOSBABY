@@ -66,7 +66,7 @@ function Inicio() {
     <div className="app">
       <Inicioala/>
       {/* Header */}
-      <header className="header" style={{ backgroundColor: headerBg, color: headerTextColor }}>
+      <header className="headers" style={{ backgroundColor: headerBg, color: headerTextColor }}>
         <div className="logo-container">
           <img src={logo} alt="SOS Baby Logo" className="logo-img" />
         </div>

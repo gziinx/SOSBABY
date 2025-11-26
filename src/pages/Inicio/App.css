@@ -1,6 +1,6 @@
 /* Header Styles */
 
-.header {
+.headers {
   position: fixed;
   top: 0;
   left: 0;
@@ -398,7 +398,7 @@
 
 /* Responsive */
 @media (max-width: 768px) {
-  .header {
+  .headers {
     padding: 0 30px;
   }
 
