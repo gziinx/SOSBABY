@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './App.css';
 import logo from '../../assets/logo.png';
+import { Inicioala } from '../../styles/GglobalStyles';
 
 function Inicio() {
   const navigate = useNavigate();
@@ -63,6 +64,7 @@ function Inicio() {
 
   return (
     <div className="app">
+      <Inicioala/>
       {/* Header */}
       <header className="header" style={{ backgroundColor: headerBg, color: headerTextColor }}>
         <div className="logo-container">

@@ -145,6 +145,18 @@ const navigate = useNavigate();
 const handleCalendar = () => {
     navigate('/calendario');
   };
+  const handleConsulta = () => {
+    navigate('/conulta');
+  };
+  const handleRotina = () => {
+    navigate('/rotina');
+  };
+   const handlePerfil = () => {
+    navigate('/perfil');
+  };
+  const handleHome = () => {
+    navigate('/home');
+  };
 
   return (
     <>
@@ -154,14 +166,14 @@ const handleCalendar = () => {
             <img src={logo} alt="SOS Baby" className="logu" />
           </div>
           <div className="nav-center">
-            <a href="#">Home</a>
+            <a href="" onClick={handleHome}>Home</a>
             <a href="" onClick={handleCalendar}>Calendário</a>
-            <a href="./dicas">Dicas</a>
-            <a href="#">Consultas</a>
-            <a href="#">Rotina</a>
+            <a href="">Dicas</a>
+            <a href="" onClick={handleConsulta}>Consultas</a>
+            <a href="" onClick={handleRotina}>Rotina</a>
           </div>
           <div className="nav-right">
-            <i data-lucide="bell" className="icon"></i>
+            <i data-lucide="bell" className="icon" ></i>
             <i data-lucide="user" className="icon user-icon"></i>
           </div>
         </nav>

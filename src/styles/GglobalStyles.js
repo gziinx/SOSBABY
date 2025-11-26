@@ -12,6 +12,53 @@ export const GlobalStyle = createGlobalStyle`
     font-family: 'Krona One', sans-serif;;
   }
 `
+export const Inicioala = createGlobalStyle`
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  font-family: 'Krona One', sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  
+  --primary-color: #AEDCFF;
+  --secondary-color: #708EF1;
+  --tertiary-color: #537BC4;
+  --dark-bg: #2C3E50;
+  --light-bg: #FFFFFF;
+  --text-dark: #537BC4;
+  --text-light: #FFFFFF;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  background-color: var(--light-bg);
+  color: var(--text-dark);
+  overflow-x: hidden;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  outline: none;
+  font-family: inherit;
+}
+`
 export const DicasStyle = createGlobalStyle`
 *:root{
   --blue:#708EF1; /* Bebês e tons azuis gerais */
