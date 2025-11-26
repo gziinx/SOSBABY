@@ -6,7 +6,7 @@
   left: 0;
   right: 0;
   height: 80px;
-  background-color: rgba(255, 255, 255, 0.95);
+  background-color:transparent;
   backdrop-filter: blur(10px);
   display: flex;
   justify-content: space-between;
@@ -32,6 +32,13 @@
 .logo-img:hover {
   transform: scale(1.05);
 }
+.navs{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: transparent;
+  transition: color white;
+}
 
 .nav-links {
   display: flex;
@@ -43,7 +50,7 @@
   color: inherit;
   font-size: 14px;
   font-weight: 400;
-  transition: color 0.3s, transform 0.3s;
+  transition: color white 0.3s, transform 0.3s;
   cursor: pointer;
   position: relative;
 }
@@ -68,7 +75,7 @@
   transform: translateY(-2px);
 }
 
-.header-buttons {
+.headers-buttons {
   display: flex;
   gap: 15px;
 }

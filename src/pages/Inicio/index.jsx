@@ -71,7 +71,7 @@ function Inicio() {
           <img src={logo} alt="SOS Baby Logo" className="logo-img" />
         </div>
         
-        <nav>
+        <nav className='navs'>
           <ul className="nav-links">
             <li><a onClick={() => scrollToSection('inicio')}>Início</a></li>
             <li><a onClick={() => scrollToSection('sobre')}>Sobre</a></li>
@@ -79,7 +79,7 @@ function Inicio() {
           </ul>
         </nav>
 
-        <div className="header-buttons">
+        <div className="headers-buttons">
           <button className="btn-login" onClick={handleLogin}>Login</button>
           <button className="btn-signup" onClick={handleSing}>Sing Up</button>
         </div>

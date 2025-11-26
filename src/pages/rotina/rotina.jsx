@@ -163,6 +163,7 @@ const Rotina = () => {
             rotina.id_user && rotina.id_user.toString() === userId.toString()
           );
           
+          console.log('Rotinas recebidas:', userRotinas);
           setRotinas(userRotinas);
           setApiStatus('success');
         } else {
@@ -193,22 +194,52 @@ const Rotina = () => {
     }
   };
 
+  const formatTimeForDisplay = (timeString) => {
+    if (!timeString) return 'Sem horário';
+    
+    try {
+      // If it's in the format 1970-01-01T12:22:00.000Z
+      if (timeString.includes('1970-01-01T') && timeString.endsWith('Z')) {
+        const timePart = timeString.split('T')[1].split('.')[0];
+        return timePart.substring(0, 5); // Returns just HH:MM
+      }
+      
+      // If it's just the time part (HH:MM)
+      if (timeString.includes(':')) {
+        const [hours, minutes] = timeString.split(':');
+        return `${hours.padStart(2, '0')}:${minutes.padStart(2, '0')}`;
+      }
+      
+      return timeString; // Return as is if format is not recognized
+    } catch (error) {
+      console.error('Erro ao formatar horário:', error);
+      return timeString; // Return original if there's an error
+    }
+  };
+
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  setLoading(true);
+    e.preventDefault();
+    setLoading(true);
 
-  try {
-    const userId = getUserIdFromToken();
+    try {
+      const userId = getUserIdFromToken();
 
-const rotinaData = {
-  titulo_rotina: formData.titulo_item,
-  titulo_item: formData.titulo_item,
-  descricao: formData.descricao,
-  data_rotina: formData.data_rotina,
-  hora: formData.hora,
-  cor: formData.cor,
-  id_user: userId
-};
+      // Format the time to ensure it's in HH:MM format
+      let formattedTime = formData.hora;
+      if (formData.hora) {
+        const [hours, minutes] = formData.hora.split(':');
+        formattedTime = `${hours.padStart(2, '0')}:${minutes || '00'}`;
+      }
+
+      const rotinaData = {
+        titulo_rotina: formData.titulo_item,
+        titulo_item: formData.titulo_item,
+        descricao: formData.descricao,
+        data_rotina: formData.data_rotina,
+        hora: formattedTime,
+        cor: formData.cor,
+        id_user: userId
+      };
 console.log(rotinaData)
     const response = await fetch(
       'https://backend-sosbaby.onrender.com/v1/sosbaby/RelacionamentoRotina/cadastro',
@@ -432,17 +463,22 @@ console.log(rotinaData)
             <div 
               key={rotina.id_item} 
               className="rotina-card"
-              style={{ borderLeft: `4px solid ${rotina.cor}` }}
+              style={{ borderLeft: `4px solid ${rotina.cor || '#6366f1'}` }}
             >
               <div className="rotina-info">
-                <h3>{rotina.titulo}</h3>
-                <p>{rotina.descricao}</p>
-                <div className="rotina-time">
-                  <span>📅 {new Date(rotina.data_rotina).toLocaleDateString('pt-BR')}</span>
-                  <span>⏰ {rotina.hora}</span>
+                <h3>{rotina.titulo_item || rotina.titulo || 'Sem título'}</h3>
+                {rotina.descricao && <p className="rotina-descricao">{rotina.descricao}</p>}
+                <div className="rotina-meta">
+                  {rotina.data_rotina && (
+                    <div className="rotina-data">
+                      📅 {new Date(rotina.data_rotina).toLocaleDateString('pt-BR')}
+                    </div>
+                  )}
+                  <div className="rotina-time">
+                    ⏰ {rotina.hora ? formatTimeForDisplay(rotina.hora) : 'Sem horário'}
+                  </div>
                 </div>
               </div>
-              
               <div className="rotina-actions">
                 <button 
                   className="edit-btn"
