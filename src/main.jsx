@@ -19,6 +19,7 @@ import Consulta from './pages/consulta/consulta'
 import CreateCall from './pages/criarconsulta/CreateCall'
 import DicasClinica from './pages/dicasclinica/dicasclinica';
 import Perfil from './pages/perfil/perfil';
+import Chat from './pages/chat/chat';
 // Lazy load pages to isolate CSS per route
 const Calendarioo = lazy(() => import('./pages/calendario/calendario'))
 const Home = lazy(() => import('./pages/home/home'))
@@ -45,6 +46,7 @@ createRoot(document.getElementById('root')).render(
         <Route path='/criarconsulta' element={<CreateCall/>}/>  
         <Route path='/dicasclinica' element={<DicasClinica/>}/>
         <Route path='/perfil' element={<Perfil/>}/>
+        <Route path='/chat' element={<Chat/>}/>
       </Routes>
     </Suspense>
   </BrowserRouter>

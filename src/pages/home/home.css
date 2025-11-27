@@ -371,13 +371,27 @@ section {
 }
 
 .routine-section h2 {
-    background: #fff;
-    color: #2563EB;
-    padding: 0.5rem 1.5rem;
-    border-radius: 9999px;
-    display: inline-block;
-    margin-bottom: 1rem;
-    font-weight: 600;
+  text-align: center;
+  color: #4a6ef5;
+  font-size: 2.5rem;
+  margin-bottom: 2rem;
+  position: relative;
+  padding-bottom: 1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.routine-section h2::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 4px;
+  background: #4a6ef5;
+  border-radius: 2px;
 }
 
 .routine {
@@ -800,6 +814,393 @@ footer .brand {
     /* Novo posicionamento: Use margin-top para criar espaço do número */
     margin-top: 5px;
     /* Adiciona um pequeno espaço entre o número e o ponto */
+}
+
+/* Routine Section */
+
+
+.routine-section h2 {
+  color: #2c3e50;
+  font-size: 2rem;
+  margin-bottom: 2rem;
+  text-align: center;
+  position: relative;
+  display: inline-block;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0 2rem;
+  background: #fff;
+  z-index: 1;
+}
+
+.routine-section h2::before,
+.routine-section h2::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 100px;
+  height: 2px;
+  background: linear-gradient(90deg, #4a6ef5, rgba(74, 110, 245, 0.2));
+  z-index: -1;
+}
+
+.routine-section h2::before {
+  right: 100%;
+  transform: translateY(-50%);
+}
+
+.routine-section h2::after {
+  left: 100%;
+  transform: translateY(-50%);
+}
+
+.routine {
+  display: flex;
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(74, 110, 245, 0.1);
+  overflow: hidden;
+  position: relative;
+  border: 1px solid rgba(74, 110, 245, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.routine:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 35px rgba(74, 110, 245, 0.15);
+}
+
+.routine-tasks {
+  flex: 3;
+  padding: 2rem;
+  position: relative;
+}
+
+.routine-tasks::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  width: 1px;
+  background: linear-gradient(to bottom, transparent, rgba(74, 110, 245, 0.1), transparent);
+}
+
+.task {
+  display: flex;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  margin-bottom: 0.75rem;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  background: #fff;
+  border: 1px solid #c3c8cf;
+  position: relative;
+  overflow: hidden;
+}
+
+.task::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: #4a6ef5;
+  border-radius: 4px 0 0 4px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.task:hover {
+  transform: translateX(5px);
+  box-shadow: 0 5px 15px rgba(74, 110, 245, 0.1);
+  border-color: rgba(74, 110, 245, 0.2);
+}
+
+.task:hover::before {
+  opacity: 1;
+}
+
+.task-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: #4a6ef5;
+  margin-right: 1.25rem;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+  box-shadow: 0 0 0 3px rgba(74, 110, 245, 0.2);
+  transition: all 0.3s ease;
+}
+
+.task:hover .task-dot {
+  transform: scale(1.2);
+  box-shadow: 0 0 0 5px rgba(74, 110, 245, 0.3);
+}
+
+.task-dot.completed {
+  background-color: #4caf50;
+  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
+}
+
+.task span:first-of-type {
+  flex: 1;
+  color: #2c3e50;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.task:hover span:first-of-type {
+  color: #1a2b4d;
+}
+
+.task span:last-of-type {
+  color: #7f8c8d;
+  font-size: 0.9rem;
+  margin-left: 1rem;
+  background: #f8f9fa;
+  padding: 0.3rem 0.8rem;
+  border-radius: 20px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.task:hover span:last-of-type {
+  background: #4a6ef5;
+  color: white;
+}
+
+.routine-sidebar {
+  flex: 1;
+  background: linear-gradient(135deg, #f8faff 0%, #f0f4ff 100%);
+  padding: 2rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.routine-sidebar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 5px;
+  background: linear-gradient(90deg, #4a6ef5, #8a63f2);
+}
+
+.routine-sidebar > div {
+  padding: 1.2rem 1rem;
+  background: #fff;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+  font-weight: 600;
+  color: #4a6ef5;
+  border: 1px solid #e6e9f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.routine-sidebar > div::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(74, 110, 245, 0.1) 0%, rgba(138, 99, 242, 0.1) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: -1;
+}
+
+.routine-sidebar > div:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(74, 110, 245, 0.15);
+  border-color: rgba(74, 110, 245, 0.3);
+}
+
+.routine-sidebar > div:hover::before {
+  opacity: 1;
+}
+
+.routine-loading,
+.routine-error,
+.no-routine {
+  text-align: center;
+  padding: 3rem 2rem;
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+  margin: 1rem 0;
+  border: 1px dashed #e6e9f0;
+  transition: all 0.3s ease;
+}
+
+.routine-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.routine-loading::after {
+  content: '';
+  width: 30px;
+  height: 30px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #4a6ef5;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.routine-error p {
+  color: #e74c3c;
+  margin-bottom: 1.5rem;
+  font-size: 1.05rem;
+}
+
+.no-routine {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 3.5rem 2rem;
+}
+
+.no-routine p {
+  color: #7f8c8d;
+  margin: 0;
+  font-size: 1.1rem;
+  max-width: 400px;
+  line-height: 1.6;
+}
+
+.btn {
+  background: linear-gradient(135deg, #4a6ef5 0%, #8a63f2 100%);
+  color: white;
+  border: none;
+  padding: 0.8rem 2rem;
+  border-radius: 50px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  box-shadow: 0 4px 15px rgba(74, 110, 245, 0.3);
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #3a5bd9 0%, #7a52d9 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: -1;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(74, 110, 245, 0.4);
+}
+
+.btn:hover::before {
+  opacity: 1;
+}
+
+/* Responsividade */
+@media (max-width: 992px) {
+  .routine-section {
+    max-width: 900px;
+  }
+}
+
+@media (max-width: 768px) {
+  .routine-section {
+    padding: 0 1rem;
+  }
+  
+  .routine-section h2 {
+    font-size: 1.7rem;
+    padding: 0 1.5rem;
+  }
+  
+  .routine {
+    flex-direction: column;
+    border-radius: 15px;
+  }
+  
+  .routine-tasks {
+    padding: 1.5rem 1.25rem;
+  }
+  
+  .routine-tasks::before {
+    display: none;
+  }
+  
+  .task {
+    padding: 0.9rem 1.25rem;
+  }
+  
+  .routine-sidebar {
+    flex-direction: row;
+    flex-wrap: wrap;
+    padding: 1.5rem 1.25rem;
+    gap: 0.75rem;
+    background: #fff;
+    border-top: 1px solid #f0f2f5;
+  }
+  
+  .routine-sidebar::before {
+    display: none;
+  }
+  
+  .routine-sidebar > div {
+    flex: 1 1 calc(50% - 0.5rem);
+    min-width: 120px;
+    padding: 1rem 0.5rem;
+    font-size: 0.9rem;
+  }
+  
+  .no-routine {
+    padding: 2.5rem 1.5rem;
+  }
+  
+  .no-routine p {
+    font-size: 1rem;
+  }
+  
+  .btn {
+    padding: 0.7rem 1.75rem;
+    font-size: 0.9rem;
+  }
 }
 
 /* Chat IA Section */

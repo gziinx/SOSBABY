@@ -41,7 +41,7 @@ const Perfil = () => {
     <>
       <PerfilStyle/>
       <header>
-        <nav className="nav">
+        <nav className="navs">
           <div className="nav-left">
             <img src={logo} alt="SOS Baby" className="logu" />
           </div>
@@ -56,7 +56,7 @@ const Perfil = () => {
 
           <div className="nav-right">
             <i data-lucide="bell" className="icon"></i>
-            <i data-lucide="user" className="icon user-icon"></i>
+            <i data-lucide="user" className="user-icon"></i>
           </div>
         </nav>
         </header>

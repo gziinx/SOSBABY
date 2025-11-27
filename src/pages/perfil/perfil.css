@@ -1,5 +1,7 @@
 
 .container {
+    margin-left: auto;
+    margin-right: auto;
     display: flex;
     flex-direction: column;
     margin-top: 20px;
@@ -31,11 +33,13 @@
     font-size: 16px;
 }
 
-nav {
-    width: 100%;
+.navs {
+    width: 100vw;
     padding: 15px;
     font-size: 16px;
     background: #ffffff;
+    display: flex;
+    justify-content: space-between ;
     color: #000;
     cursor: pointer;
     height: 75px;

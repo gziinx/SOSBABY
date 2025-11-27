@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import './home.css';
 import logo from '../../assets/logoo.png';
 import heroImg from '../../assets/home.png';
@@ -8,8 +8,116 @@ import { useNavigate } from 'react-router-dom';
 import senai from '../../assets/senai.png';
 import ChatComIA from '../chatcomia/chatcomia';
 
+function getUserIdFromToken() {
+  try {
+    const token = localStorage.getItem('token') || 
+                 localStorage.getItem('authToken') ||
+                 sessionStorage.getItem('token') ||
+                 sessionStorage.getItem('authToken');
+    
+    if (!token) return 2; // fallback para ID 2
+    
+    // Decodificar o payload do JWT (parte do meio)
+    const payload = token.split('.')[1];
+    const decodedPayload = JSON.parse(atob(payload));
+    
+    // Tenta encontrar o ID do usuário em diferentes formatos possíveis
+    return decodedPayload.id_user || 
+           decodedPayload.userId || 
+           decodedPayload.user_id || 
+           2; // fallback para ID 2
+  } catch (error) {
+    console.error('Erro ao decodificar token:', error);
+    return 2; // fallback para ID 2
+  }
+}
+
 export default function Home() {
-const navigate = useNavigate();  
+  const navigate = useNavigate();  
+  const [rotinas, setRotinas] = useState([]);
+  const [apiStatus, setApiStatus] = useState('loading');
+
+  const fetchRotinas = async () => {
+    try {
+      console.log('Iniciando busca de rotinas...');
+      
+      const token = localStorage.getItem('token');
+      if (!token) {
+        console.error('Token não encontrado no localStorage');
+        setApiStatus('error');
+        return;
+      }
+      
+      const userId = getUserIdFromToken();
+      if (!userId) {
+        console.error('ID do usuário não encontrado no token');
+        setApiStatus('error');
+        return;
+      }
+      
+      const url = `https://backend-sosbaby.onrender.com/v1/sosbaby/viewRoutines?id_user=${userId}`;
+      console.log('URL da requisição:', url);
+      
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      console.log('Status da resposta:', response.status);
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Erro na resposta da API:', {
+          status: response.status,
+          statusText: response.statusText,
+          error: errorText
+        });
+        throw new Error(`Erro na requisição: ${response.status} ${response.statusText}`);
+      }
+      
+      const responseData = await response.json();
+      console.log('Dados recebidos:', responseData);
+      
+      if (responseData && Array.isArray(responseData.data)) {
+        // Filtra as rotinas pelo ID do usuário (segurança adicional)
+        const userRotinas = responseData.data.filter(rotina => 
+          rotina && rotina.id_user && rotina.id_user.toString() === userId.toString()
+        );
+        
+        // Mapeia os dados para garantir que estejam no formato esperado
+        const rotinasFormatadas = userRotinas.map(rotina => ({
+          ...rotina,
+          titulo: rotina.titulo_rotina || rotina.titulo || 'Sem título',
+          cor: rotina.cor || '#6366f1',
+          data_rotina: rotina.data_rotina || new Date().toISOString().split('T')[0],
+          hora: rotina.hora || '00:00'
+        }));
+        
+        console.log('Rotinas formatadas:', rotinasFormatadas);
+        setRotinas(rotinasFormatadas);
+        setApiStatus('success');
+      } else {
+        console.log('Nenhuma rotina encontrada ou formato inválido de dados');
+        setRotinas([]);
+        setApiStatus('success');
+      }
+    } catch (error) {
+      console.error('Erro ao buscar rotinas:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name
+      });
+      setApiStatus('error');
+    }
+  };
+
+  useEffect(() => {
+    fetchRotinas();
+  }, []);
+
   useEffect(() => {
     try { if (window.lucide?.createIcons) window.lucide.createIcons(); } catch {}
 
@@ -144,7 +252,7 @@ const navigate = useNavigate();
     return () => {};
   }, []);
 
-const handleCalendar = () => {
+  const handleCalendar = () => {
     navigate('/calendario');
   };
   const handleConsulta = () => {
@@ -153,12 +261,16 @@ const handleCalendar = () => {
   const handleRotina = () => {
     navigate('/rotina');
   };
-   const handlePerfil = () => {
+  const handlePerfil = () => {
     navigate('/perfil');
   };
   const handleHome = () => {
     navigate('/home');
   };
+   const handleChat = () => {
+    navigate('/');
+  };
+
 
   return (
     <>
@@ -174,7 +286,7 @@ const handleCalendar = () => {
             <a href="" onClick={handleConsulta}>Consultas</a>
             <a href="" onClick={handleRotina}>Rotina</a>
           </div>
-          <div className="nav-right">
+          <div className="nav-right"onClick={handlePerfil}>
             <i data-lucide="bell" className="icon" ></i>
             <i data-lucide="user" className="icon user-icon"></i>
           </div>
@@ -252,30 +364,51 @@ const handleCalendar = () => {
             <div className="linha"></div>
             {/* Substitua os src abaixo quando adicionar as imagens */}
             <img src={homeRight} alt="" className="direta" />
-<img src={homeLeft} alt="" className="esquerda" />
+            <img src={homeLeft} alt="" className="esquerda" />
           </div>
         </section>
 
         {/* Routine */}
         <section className="routine-section">
           <h2>Rotina do dia</h2>
-          <div className="routine">
-            <div className="routine-tasks">
-              <div className="task"><div className="task-dot completed"></div><span className="task-completed">Café da manhã</span><span>07:00</span></div>
-              <div className="task"><div className="task-dot completed"></div><span className="task-completed">Creche</span><span>08:00</span></div>
-              <div className="task"><div className="task-dot"></div>Buscar nenhém<span>11:30</span></div>
-              <div className="task"><div className="task-dot"></div>Almoço<span>12:00</span></div>
-              <div className="task"><div className="task-dot"></div>Soneca<span>13:30</span></div>
-              <div className="task"><div className="task-dot"></div>Jantar<span>19:00</span></div>
-              <div className="task"><div className="task-dot"></div>Dormir<span>20:30</span></div>
-              <button className="btn">Ver rotina</button>
+          {apiStatus === 'loading' ? (
+            <div className="routine-loading">Carregando rotina...</div>
+          ) : apiStatus === 'error' ? (
+            <div className="routine-error">
+              <p>Não foi possível carregar as rotinas. Tente novamente mais tarde.</p>
+              <button className="btn" onClick={fetchRotinas}>Tentar novamente</button>
             </div>
-            <div className="routine-sidebar">
-              <div>Exames</div>
-              <div>Dicas</div>
-              <div>Rotinas</div>
+          ) : rotinas.length > 0 ? (
+            <div className="routine">
+              <div className="routine-tasks">
+                {rotinas.map((rotina, index) => {
+                  // Formata a hora para exibição
+                  const horaFormatada = rotina.hora ? 
+                    rotina.hora.includes('T') ? 
+                      new Date(rotina.hora).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : 
+                      rotina.hora : 
+                    '--:--';
+                  
+                  return (
+                    <div key={index} className="task" style={{ borderLeft: `4px solid ${rotina.cor || '#6366f1'}` }}>
+                      <div className="task-dot" style={{ backgroundColor: rotina.cor || '#6366f1' }}></div>
+                      <div className="task-info">
+                        <span className="task-title">{rotina.titulo_rotina || rotina.titulo || 'Sem título'}</span>
+                        {rotina.descricao && <span className="task-desc">{rotina.descricao}</span>}
+                      </div>
+                      <span className="task-time">{horaFormatada}</span>
+                    </div>
+                  );
+                })}
+                <button className="btn" onClick={() => navigate('/rotina')}>Ver rotina completa</button>
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="no-routine">
+              <p>Você ainda não tem uma rotina cadastrada.</p>
+              <button className="btn" onClick={() => navigate('/rotina')}>Criar rotina</button>
+            </div>
+          )}
         </section>
 
         {/* Chat IA */}

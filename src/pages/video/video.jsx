@@ -14,21 +14,21 @@ import "./video.css";
  * - onConnected?: (room) => void
  * - onDisconnected?: () => void
  */
-export default function VideoCall({
-  roomName,
-  tokenEndpoint = "https://backend-sosbaby.onrender.com/v1/sosbaby/call/token",
-  authToken = typeof window !== "undefined"
-    ? (
-        localStorage.getItem("token") ||
-        localStorage.getItem("authToken") ||
-        localStorage.getItem("access_token") ||
-        ""
-      )
-    : "",
-  useCookies = false,
-  onConnected,
-  onDisconnected,
-}) {
+  export default function VideoCall({
+    roomName,
+    tokenEndpoint = "https://backend-sosbaby.onrender.com/v1/sosbaby/call/token",
+    authToken = typeof window !== "undefined"
+      ? (
+          localStorage.getItem("token") ||
+          localStorage.getItem("authToken") ||
+          localStorage.getItem("access_token") ||
+          ""
+        )
+      : "",
+    useCookies = false,
+    onConnected,
+    onDisconnected,
+  }) {
   const localRef = useRef(null);
   const remoteRef = useRef(null);
 
