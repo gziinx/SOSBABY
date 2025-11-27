@@ -71,7 +71,7 @@ function Inicio() {
           <img src={logo} alt="SOS Baby Logo" className="logo-img" />
         </div>
         
-        <nav className='navs'>
+        <nav className='navss'>
           <ul className="nav-links">
             <li><a onClick={() => scrollToSection('inicio')}>Início</a></li>
             <li><a onClick={() => scrollToSection('sobre')}>Sobre</a></li>

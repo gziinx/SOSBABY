@@ -59,7 +59,7 @@ export default function Tipo() {
                 {/* ADMIN */}
                 <Card 
                     img={bebe}
-                    title="ADMIN"
+                    title="Clínica"
                     text="Acesso ao painel administrativo e gerenciamento do sistema."
                     onClick={() => navigate("/cadastro", { state: { tipo_id: 3 } })}
                 />

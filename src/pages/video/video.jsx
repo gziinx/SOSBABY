@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import Video from "twilio-video";
+import { useNavigate } from "react-router-dom";
 import "./video.css";
 
 /**
@@ -31,12 +32,15 @@ import "./video.css";
   }) {
   const localRef = useRef(null);
   const remoteRef = useRef(null);
+  const navigate = useNavigate();
 
   const [room, setRoom] = useState(null);
   const [identity, setIdentity] = useState("");
   const [remoteParticipant, setRemoteParticipant] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [isMicOn, setIsMicOn] = useState(true);
+  const [isCamOn, setIsCamOn] = useState(true);
 
   // Busca o token no backend
   async function fetchToken() {
@@ -218,6 +222,18 @@ setIdentity(userIdentity);
           
           setRoom(connectedRoom);
           onConnected?.(connectedRoom);
+
+          // Estado inicial dos toggles baseado nas tracks locais
+          try {
+            const audioPubs = Array.from(connectedRoom.localParticipant.audioTracks?.values?.() || []);
+            const videoPubs = Array.from(connectedRoom.localParticipant.videoTracks?.values?.() || []);
+            const audioEnabled = audioPubs.some(p => p?.track?.isEnabled);
+            const videoEnabled = videoPubs.some(p => p?.track?.isEnabled);
+            setIsMicOn(audioPubs.length === 0 ? false : audioEnabled);
+            setIsCamOn(videoPubs.length === 0 ? false : videoEnabled);
+          } catch (e) {
+            console.warn('Não foi possível ler estado inicial de áudio/vídeo', e);
+          }
           
           // Log de eventos da sala
           connectedRoom.on('reconnecting', error => {
@@ -412,20 +428,7 @@ setIdentity(userIdentity);
           });
         });
 
-        participant.on("trackSubscribed", (track) => {
-  if (track.kind === "audio") {
-    const audio = track.attach(); // Twilio já cria o <audio>
-    audio.autoplay = true;
-    audio.muted = false;       // garante que não está mudo
-    audio.volume = 1;          // volume máximo
-    remoteRef.current.appendChild(audio);
-
-    // Forçar play para contornar bloqueio de autoplay
-    audio.play().catch(e => {
-      console.warn("⚠️ Navegador bloqueou autoplay do áudio remoto:", e);
-    });
-  }
-});
+        
 
         // Saída de participantes
         connectedRoom.on("participantDisconnected", participant => {
@@ -489,6 +492,61 @@ const [id_user, nome_user] = (() => {
 })();
 
 
+  // Handlers de controles
+  function handleToggleAudio() {
+    try {
+      if (!room) return;
+      const pubs = Array.from(room.localParticipant.audioTracks?.values?.() || []);
+      if (pubs.length === 0) return;
+      const currentlyOn = pubs.some(p => p?.track?.isEnabled);
+      pubs.forEach(p => {
+        if (!p?.track) return;
+        if (currentlyOn) p.track.disable(); else p.track.enable();
+      });
+      setIsMicOn(!currentlyOn);
+    } catch (e) {
+      console.error('Erro ao alternar áudio', e);
+    }
+  }
+
+  function handleToggleVideo() {
+    try {
+      if (!room) return;
+      const pubs = Array.from(room.localParticipant.videoTracks?.values?.() || []);
+      if (pubs.length === 0) return;
+      const currentlyOn = pubs.some(p => p?.track?.isEnabled);
+      pubs.forEach(p => {
+        if (!p?.track) return;
+        if (currentlyOn) p.track.disable(); else p.track.enable();
+      });
+      setIsCamOn(!currentlyOn);
+    } catch (e) {
+      console.error('Erro ao alternar vídeo', e);
+    }
+  }
+
+  function handleEndCall() {
+    try {
+      if (room) {
+        // limpar tracks locais do DOM e parar
+        room.localParticipant?.tracks?.forEach(publication => {
+          const track = publication.track;
+          try {
+            track?.stop?.();
+            track?.detach?.().forEach(el => el.remove());
+          } catch (_) {}
+        });
+        room.disconnect();
+      }
+    } catch (e) {
+      console.error('Erro ao encerrar chamada', e);
+    } finally {
+      setRoom(null);
+      setRemoteParticipant(null);
+      navigate('/home');
+    }
+  }
+
   return (
     <div className="video-call">
       <div className="video-shell">
@@ -521,20 +579,62 @@ const [id_user, nome_user] = (() => {
           </div>
 
           <div className="video-controls">
-            <button type="button" className="video-control-btn video-control-btn--secondary">
-              <span className="video-control-icon video-control-icon--audio-off" />
+            <button
+              type="button"
+              onClick={handleToggleAudio}
+              disabled={!room}
+              className={`video-control-btn video-control-btn--secondary ${!isMicOn ? 'video-control-btn--danger' : ''}`}
+              aria-pressed={!isMicOn}
+              aria-label={isMicOn ? 'Desativar microfone' : 'Ativar microfone'}
+            >
+              {isMicOn ? (
+                <svg className="video-control-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <rect x="9" y="3" width="6" height="10" rx="3" />
+                  <path d="M6 11a6 6 0 0 0 12 0" />
+                  <path d="M12 17v4" />
+                  <path d="M8 21h8" />
+                </svg>
+              ) : (
+                <svg className="video-control-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <rect x="9" y="3" width="6" height="10" rx="3" />
+                  <path d="M6 11a6 6 0 0 0 12 0" />
+                  <path d="M12 17v4" />
+                  <path d="M8 21h8" />
+                  <path d="M4 4l16 16" />
+                </svg>
+              )}
             </button>
-            <button type="button" className="video-control-btn video-control-btn--secondary">
-              <span className="video-control-icon video-control-icon--video-off" />
+            <button
+              type="button"
+              onClick={handleToggleVideo}
+              disabled={!room}
+              className={`video-control-btn video-control-btn--secondary ${!isCamOn ? 'video-control-btn--danger' : ''}`}
+              aria-pressed={!isCamOn}
+              aria-label={isCamOn ? 'Desativar câmera' : 'Ativar câmera'}
+            >
+              {isCamOn ? (
+                <svg className="video-control-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <rect x="3" y="6" width="12" height="12" rx="2" />
+                  <path d="M15 10l6-3v10l-6-3z" />
+                </svg>
+              ) : (
+                <svg className="video-control-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <rect x="3" y="6" width="12" height="12" rx="2" />
+                  <path d="M15 10l6-3v10l-6-3z" />
+                  <path d="M4 4l16 16" />
+                </svg>
+              )}
             </button>
-            <button type="button" className="video-control-btn video-control-btn--danger">
-              <span className="video-control-icon video-control-icon--end" />
-            </button>
-            <button type="button" className="video-control-btn video-control-btn--secondary">
-              <span className="video-control-icon video-control-icon--chat" />
-            </button>
-            <button type="button" className="video-control-btn video-control-btn--secondary">
-              <span className="video-control-icon video-control-icon--more" />
+            <button
+              type="button"
+              onClick={handleEndCall}
+              className="video-control-btn video-control-btn--danger"
+              aria-label="Encerrar chamada"
+            >
+              <svg className="video-control-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M6 6l12 12" />
+                <path d="M18 6l-12 12" />
+              </svg>
             </button>
           </div>
         </div>
