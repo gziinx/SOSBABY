@@ -5,6 +5,8 @@ import heroImg from '../../assets/home.png';
 import homeRight from '../../assets/homeri.png';
 import homeLeft from '../../assets/homeleft.png';
 import { useNavigate } from 'react-router-dom';
+import senai from '../../assets/senai.png';
+import ChatComIA from '../chatcomia/chatcomia';
 
 export default function Home() {
 const navigate = useNavigate();  
@@ -276,29 +278,18 @@ const handleCalendar = () => {
           </div>
         </section>
 
-        {/* Chat/FAQ */}
-        <section className="chat-section">
-          <div className="chat-box">
-            <h3>Tire dúvidas rápidas com nossa IA</h3>
-            <input type="text" placeholder="Faça sua pergunta..." />
-            <button>Enviar</button>
-          </div>
-          <div className="faq">
-            <h3>Dúvidas Frequentes</h3>
-            <button>Como funciona o calendário?</button>
-            <button>Como adicionar um lembrete?</button>
-            <button>Como falar com um médico?</button>
+        {/* Chat IA */}
+        <section className="chat-ia-section">
+          <div className="chat-ia-container">
+            <ChatComIA />
           </div>
         </section>
       </main>
 
       <footer>
         <div className="socials">
-          <a href="#" aria-label="Facebook">F</a>
-          <a href="#" aria-label="Twitter">T</a>
-          <a href="#" aria-label="Instagram">I</a>
+          <img src={senai} alt="" />
         </div>
-        <div className="brand">SOS Baby</div>
         <p>&copy; {new Date().getFullYear()} SOS Baby. Todos os direitos reservados.</p>
       </footer>
     </>

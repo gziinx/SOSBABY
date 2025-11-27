@@ -30,6 +30,8 @@ function CadastroRespon() {
   const [userId, setUserId] = useState(null);
   const [nomeConvenio, setNomeConvenio] = useState("");
 const [idConvenio, setIdConvenio] = useState("");
+const [cartaoMedico, setCartaoMedico] = useState("");
+
   // Redimensiona e comprime a imagem antes de enviar
   const handleFileChange = (e) => {
     const file = e.target.files?.[0];

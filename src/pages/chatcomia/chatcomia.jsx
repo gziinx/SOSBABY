@@ -83,7 +83,7 @@ export default function ChatComIA() {
   return (
     <div className="chat-ia-page">
       <div className="chat-ia-card">
-        <div className="chat-ia-header">Chat com IA</div>
+        <div className="chat-ia-header">Baby IA</div>
         <div ref={listRef} className="chat-ia-messages">
           {messages.length === 0 && (
             <div className="chat-ia-empty">Envie uma pergunta para começar.</div>
