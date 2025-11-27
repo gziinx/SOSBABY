@@ -41,6 +41,7 @@ import "./video.css";
   const [error, setError] = useState("");
   const [isMicOn, setIsMicOn] = useState(true);
   const [isCamOn, setIsCamOn] = useState(true);
+  const [remoteVideoOn, setRemoteVideoOn] = useState(false);
 
   // Busca o token no backend
   async function fetchToken() {
@@ -77,9 +78,14 @@ import "./video.css";
     try {
       console.log(`Anexando track ${track.kind} ao container`, container);
       
-      // Limpa o container antes de adicionar um novo vídeo
-      while (container.firstChild) {
-        container.removeChild(container.firstChild);
+      // Limpa apenas elementos de mesmo tipo ao anexar para não remover áudio
+      if (track.kind === 'video' || track.kind === 'data') {
+        Array.from(container.children).forEach(el => {
+          const tag = el.tagName?.toLowerCase?.();
+          if (tag === 'video' || tag === 'canvas') {
+            try { el.remove(); } catch (_) {}
+          }
+        });
       }
       
       const el = track.attach();
@@ -265,6 +271,13 @@ setIdentity(userIdentity);
 
         console.log('👥 Verificando participantes existentes...');
         connectedRoom.participants.forEach(participant => {
+          // Garante que exibimos o nome do remoto mesmo se ele já estiver na sala
+          setRemoteParticipant(prev => prev || participant);
+          try {
+            const vids = Array.from(participant.videoTracks?.values?.() || []);
+            const anyOn = vids.some(p => p?.track?.isEnabled);
+            setRemoteVideoOn(anyOn);
+          } catch (_) {}
           console.log(`👤 Participante já na sala: ${participant.identity} (${participant.sid})`);
           
           // Log de todos os tracks disponíveis
@@ -298,6 +311,21 @@ setIdentity(userIdentity);
                   }
                 }, 1000);
               }
+              if (publication.kind === 'video') {
+                setRemoteVideoOn(!!publication.track?.isEnabled);
+                try {
+                  publication.track.on('disabled', () => {
+                    setRemoteVideoOn(false);
+                    try {
+                      publication.track.detach()?.forEach(el => el.remove());
+                    } catch (_) {}
+                  });
+                  publication.track.on('enabled', () => {
+                    setRemoteVideoOn(true);
+                    if (remoteRef.current) attachTrack(publication.track, remoteRef.current);
+                  });
+                } catch (_) {}
+              }
             }
 
             // track ativada depois
@@ -325,6 +353,19 @@ setIdentity(userIdentity);
                   }
                 }, 1000);
               }
+              if (track.kind === 'video') {
+                setRemoteVideoOn(!!track.isEnabled);
+                try {
+                  track.on('disabled', () => {
+                    setRemoteVideoOn(false);
+                    try { track.detach()?.forEach(el => el.remove()); } catch (_) {}
+                  });
+                  track.on('enabled', () => {
+                    setRemoteVideoOn(true);
+                    if (remoteRef.current) attachTrack(track, remoteRef.current);
+                  });
+                } catch (_) {}
+              }
             });
 
             publication.on("unsubscribed", track => {
@@ -338,6 +379,7 @@ setIdentity(userIdentity);
               } catch (error) {
                 console.error('Erro ao remover elementos da track:', error);
               }
+              if (track.kind === 'video') setRemoteVideoOn(false);
             });
             
             publication.on('publishFailed', error => {
@@ -435,6 +477,7 @@ setIdentity(userIdentity);
           detachParticipantTracks(participant);
           // Limpa o participante remoto quando desconecta
           setRemoteParticipant(null);
+          setRemoteVideoOn(false);
         });
       } catch (_) {
         // erro já tratado em fetchToken ou logado
@@ -491,6 +534,23 @@ const [id_user, nome_user] = (() => {
   }
 })();
 
+  // Helper para extrair apenas o nome de uma identidade remota
+  function getDisplayName(identityStr) {
+    if (!identityStr || typeof identityStr !== 'string') return '';
+    // Formato "id|Nome"
+    if (identityStr.includes('|')) {
+      const [id, name] = identityStr.split('|');
+      return name || identityStr;
+    }
+    // Formato JSON stringificado
+    try {
+      const parsed = JSON.parse(identityStr);
+      return parsed.nome_Usuario || parsed.nome || parsed.name || identityStr;
+    } catch {
+      return identityStr;
+    }
+  }
+
 
   // Handlers de controles
   function handleToggleAudio() {
@@ -509,17 +569,48 @@ const [id_user, nome_user] = (() => {
     }
   }
 
-  function handleToggleVideo() {
+  async function handleToggleVideo() {
     try {
       if (!room) return;
       const pubs = Array.from(room.localParticipant.videoTracks?.values?.() || []);
-      if (pubs.length === 0) return;
-      const currentlyOn = pubs.some(p => p?.track?.isEnabled);
-      pubs.forEach(p => {
-        if (!p?.track) return;
-        if (currentlyOn) p.track.disable(); else p.track.enable();
-      });
-      setIsCamOn(!currentlyOn);
+      const hasTrack = pubs.some(p => p?.track);
+
+      if (hasTrack) {
+        // Desliga câmera: para, desfaz preview e unpublica para evitar congelamento no remoto
+        pubs.forEach(p => {
+          const track = p.track;
+          if (!track) return;
+          try {
+            track.stop?.();
+            track.detach?.().forEach(el => el.remove());
+          } catch (_) {}
+          try {
+            room.localParticipant.unpublishTrack(track);
+          } catch (_) {}
+        });
+        if (localRef.current) {
+          Array.from(localRef.current.children).forEach(el => el.remove());
+        }
+        setIsCamOn(false);
+      } else {
+        // Liga câmera: cria nova track e publica
+        try {
+          const track = await Video.createLocalVideoTrack({
+            width: { ideal: 1280 },
+            height: { ideal: 720 },
+            frameRate: 24,
+            aspectRatio: 16/9,
+            facingMode: 'user'
+          });
+          if (localRef.current) {
+            attachTrack(track, localRef.current);
+          }
+          await room.localParticipant.publishTrack(track);
+          setIsCamOn(true);
+        } catch (err) {
+          console.error('Erro ao criar/publicar track de vídeo', err);
+        }
+      }
     } catch (e) {
       console.error('Erro ao alternar vídeo', e);
     }
@@ -555,12 +646,8 @@ const [id_user, nome_user] = (() => {
             <div className="video-main-video" id="remote-video" ref={remoteRef} />
             <div className="video-main-overlay">
               <div className="video-main-name">
-                {remoteParticipant ? 
-                  (() => {
-                    // Extrai apenas o nome se estiver no formato "id|Nome"
-                    const parts = remoteParticipant.identity.split('|');
-                    return parts.length > 1 ? parts[1] : remoteParticipant.identity;
-                  })() 
+                {remoteParticipant
+                  ? getDisplayName(remoteParticipant.identity)
                   : (nome_user || "Aguardando participante...")}
               </div>
               <div className="video-main-actions">
@@ -574,7 +661,7 @@ const [id_user, nome_user] = (() => {
           <div className="video-self">
             <div className="video-self-video" id="local-video" ref={localRef} />
             <div className="video-self-footer">
-              <span className="video-self-name">Você</span>
+              <span className="video-self-name">{nome_user || 'Você'}</span>
             </div>
           </div>
 

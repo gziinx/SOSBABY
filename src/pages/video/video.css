@@ -46,10 +46,7 @@
 }
 
 .video-main-video:empty::before {
-  content: "Aguardando participante...";
-  color: white;
-  font-size: 16px;
-  position: absolute;
+  content: "";
 }
 
 .video-main-video video,
