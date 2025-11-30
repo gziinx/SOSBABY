@@ -10,7 +10,20 @@ export const createChat = async (chatName) => {
       body: JSON.stringify({ nome_chat: chatName })
     });
 
-    const data = await response.json();
+    const text = await response.text();
+console.log("RESPOSTA BRUTA DO BACKEND:", text);
+
+let data;
+try {
+  data = JSON.parse(text);
+} catch {
+  console.error("Backend devolveu HTML, não JSON.");
+  return {
+    success: false,
+    data: [],
+    error: "Backend retornou HTML — rota pode estar explodindo no servidor"
+  };
+}
 
     if (!response.ok) {
       console.error('Create chat error response:', data);
@@ -123,7 +136,8 @@ export const sendMessage = async (chatId, messageData) => {
 export const getChatMessages = async (chatId) => {
   try {
     // Try primary endpoint first
-    const response = await fetch(`${API_BASE_URL}/chats/messages`);
+    const response = await fetch(`${API_BASE_URL}/chat/message/${chatId}`)
+
     const data = await response.json();
 
     if (response.ok) {
@@ -136,7 +150,7 @@ export const getChatMessages = async (chatId) => {
 
     // If primary endpoint fails, try alternative endpoint
     console.log('Primary endpoint failed, trying alternative /chatMessages endpoint');
-    const alternativeResponse = await fetch(`${API_BASE_URL}/chatMessages/${chatId}`);
+    const alternativeResponse = await fetch(`${API_BASE_URL}/chat/message/${chatId}`);
     const alternativeData = await alternativeResponse.json();
 
     if (alternativeResponse.ok) {

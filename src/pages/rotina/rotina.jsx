@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './rotina.css';
-
+import logo from '../../assets/logoo.png';
 const Rotina = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [rotinas, setRotinas] = useState([]);
@@ -343,6 +343,7 @@ console.log(rotinaData)
     const step = onboardingSteps[currentStep];
     return (
       <div className="rotina-container">
+        
         <div className="onboarding-screen">
           <div className="onboarding-content">
             <div className="welcome-icon">

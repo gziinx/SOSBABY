@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import './homeclinica.css';
+import './homemedico.css';
 import logo from '../../assets/logoo.png';
 import heroImg from '../../assets/home.png';
 import homeRight from '../../assets/homeri.png';
@@ -32,7 +32,7 @@ function getUserIdFromToken() {
   }
 }
 
-export default function HomeClinica() {
+export default function HomeMedico() {
   const navigate = useNavigate();  
   const [rotinas, setRotinas] = useState([]);
   const [apiStatus, setApiStatus] = useState('loading');
@@ -282,7 +282,6 @@ export default function HomeClinica() {
           <div className="nav-center">
             <a href="" onClick={handleHome}>Home</a>
             <a href="" onClick={handleCalendar}>Calendário</a>
-            <a href="">Dicas</a>
             <a href="" onClick={handleConsulta}>Consultas</a>
             <a href="" onClick={handleRotina}>Rotina</a>
           </div>
@@ -321,54 +320,17 @@ export default function HomeClinica() {
             <div className="service" onClick={handleChat} style={{ cursor: 'pointer' }}>
               <div className="service-icon">💬</div>
               <h3>Chat </h3>
-              <p>O Chat com o médico e o paciente</p>
+              <p>O Chat com a clinica e o paciente</p>
             </div>
             <div className="service" onClick={handleRotina} style={{ cursor: 'pointer' }}>
               <div className="service-icon">📋</div>
               <h3>Rotina</h3>
-              <p>Acompanhe e gerencie as rotinas do seu bebê</p>
+              <p>Acompanhe e gerencie as rotinas de seus pacientes</p>
             </div>
           </div>
         </section>
 
-        {/* Calendar */}
-        <section className="calendar-section">
-          <div className="titu">
-            <a>Seu Calendário de Rotinas</a>
-          </div>
-          <p>
-            Acompanhe consultas, vacinas e lembretes importantes para o bem-
-            <br />estar do seu bebê.
-          </p>
-          <div id="tooltip-global-container"></div>
-
-          <div className="calendar-container">
-            <div className="calendarali">
-              <div className="ola">
-                <button id="prev" className="nav-btn">←</button>
-                <h2 id="month-year">Outubro 2025</h2>
-                <button id="next" className="nav-btn">→</button>
-              </div>
-
-              <div className="weekdays" id="weekdays">
-                <div className="weekend">Dom</div>
-                <div className="weekday">Seg</div>
-                <div className="weekday">Ter</div>
-                <div className="weekday">Qua</div>
-                <div className="weekday">Qui</div>
-                <div className="weekday">Sex</div>
-                <div className="weekend">Sáb</div>
-              </div>
-
-              <div className="days" id="days"></div>
-            </div>
-
-            <div className="linha"></div>
-            {/* Substitua os src abaixo quando adicionar as imagens */}
-            <img src={homeRight} alt="" className="direta" />
-            <img src={homeLeft} alt="" className="esquerda" />
-          </div>
-        </section>
+        
 
       
 
