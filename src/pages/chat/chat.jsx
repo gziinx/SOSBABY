@@ -7,15 +7,13 @@ const API_BASE_URL = 'https://backend-sosbaby.onrender.com/v1/sosbaby';
 const SOCKET_URL = 'https://backend-sosbaby.onrender.com';
 
 const Chat = () => {
-  const [contacts, setContacts] = useState([
-    { id: '1', nome: 'Clínica Pediatra X', tipo: 'clinic' },
-    { id: '2', nome: 'Dr. Souza', tipo: 'doctor' },
-    
-    { id: '3', nome: 'Hospitalis', tipo: 'hospital' }
-  ]);
+  const [recentConversations, setRecentConversations] = useState(() => {
+    const saved = localStorage.getItem('recentConversations');
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [contacts, setContacts] = useState([]);
   const [selectedContact, setSelectedContact] = useState(null);
   const [messages, setMessages] = useState(() => {
-    // Load messages from localStorage if they exist
     const savedMessages = localStorage.getItem('chatMessages');
     return savedMessages ? JSON.parse(savedMessages) : [];
   });
@@ -32,23 +30,17 @@ const Chat = () => {
   const messagesEndRef = useRef(null);
   const searchTimeoutRef = useRef(null);
   
-  // Socket.io connection
   useEffect(() => {
     socketRef.current = io(SOCKET_URL);
-    
     socketRef.current.on('connect', () => {
       console.log('[socket] connected as', socketRef.current.id);
     });
-    
     socketRef.current.on('connect_error', (err) => {
       console.log('[socket] connect_error', err && (err.message || err));
     });
-    
     socketRef.current.on('disconnect', (reason) => {
       console.log('[socket] disconnected', reason);
     });
-    
-    // Handle incoming messages
     socketRef.current.on('receiveMessage', handleIncomingMessage);
     
     return () => {
@@ -59,14 +51,10 @@ const Chat = () => {
     };
   }, []);
   
-  // Handle incoming messages
   const handleIncomingMessage = useCallback((msg) => {
     if (!selectedContact) return;
-    
-    const chatId = selectedContact.id;
     const hasFlat = msg && (msg.conteudo !== undefined || msg.created_at !== undefined || msg.id_user !== undefined);
     const hasNested = msg && msg.mensagem_enviada;
-    
     const text = hasFlat ? (msg.conteudo ?? '') : (hasNested ? (msg.mensagem_enviada.mensagem ?? '') : '');
     const createdRaw = hasFlat ? msg.created_at : (hasNested ? msg.mensagem_enviada.hora_envio : undefined);
     const idUser = hasFlat ? msg.id_user : undefined;
@@ -86,21 +74,17 @@ const Chat = () => {
       sender: (idUser == 1) ? 'me' : 'them',
       time: ts
     };
-    
     setMessages(prev => [...prev, message]);
   }, [selectedContact]);
   
-  // Load messages for a chat
   const loadMessages = useCallback(async (chatId) => {
     try {
       const { success, data, error } = await getChatMessages(chatId);
-      
       if (!success) {
         console.error("Erro ao buscar histórico do chat:", error);
         return [];
       }
       
-      // Normalize different response formats
       let items = [];
       if (Array.isArray(data)) {
         items = data;
@@ -115,7 +99,6 @@ const Chat = () => {
       return items.map(msg => {
         const hasFlat = msg && (msg.conteudo !== undefined || msg.created_at !== undefined || msg.id_user !== undefined);
         const hasNested = msg && msg.mensagem_enviada;
-        
         const text = hasFlat ? (msg.conteudo ?? '') : (hasNested ? (msg.mensagem_enviada.mensagem ?? '') : '');
         const createdRaw = hasFlat ? msg.created_at : (hasNested ? msg.mensagem_enviada.hora_envio : undefined);
         const idUser = hasFlat ? msg.id_user : undefined;
@@ -139,18 +122,15 @@ const Chat = () => {
     }
   }, []);
   
-  // Create a new chat
   const createNewChat = async (contact) => {
     try {
       const response = await createChat(contact.nome);
-      
       if (!response.success) {
         console.error('Failed to create chat:', response.error);
         return null;
       }
       
       const chatId = response.data?.id_chat || response.data?.id || response.data;
-      
       if (!chatId) {
         console.error('Failed to get chat ID from response:', response);
         return null;
@@ -163,7 +143,6 @@ const Chat = () => {
       
       setChatIdByContact(newChatIdByContact);
       localStorage.setItem('chatIdByContact', JSON.stringify(newChatIdByContact));
-      
       return chatId;
     } catch (err) {
       console.error('Error creating chat:', err);
@@ -171,16 +150,20 @@ const Chat = () => {
     }
   };
   
-  // Select a contact and load/create chat
+   const addToRecentConversations = (contact) => {
+    setRecentConversations((prev) => {
+      const exists = prev.some((c) => c.id === contact.id);
+      if (exists) return prev;
+      return [contact, ...prev];
+    });
+  };
+  
   const selectContact = async (contact) => {
     setLoading(true);
     setError(null);
     
     try {
-      // Check if chat already exists
       let chatId = chatIdByContact[contact.id];
-      
-      // If no chat exists, create one
       if (!chatId) {
         chatId = await createNewChat(contact);
         if (!chatId) {
@@ -190,25 +173,20 @@ const Chat = () => {
         }
       }
       
-      // Join the chat room
       socketRef.current.emit('joinChat', chatId);
-      
-      // Update state with the contact first (allow chat to open)
       setSelectedContact({ ...contact, id: String(chatId) });
       
-      // Load messages (non-blocking - chat can still open if this fails)
-      const chatMessages = await loadMessages(chatId);
+     
       
+      const chatMessages = await loadMessages(chatId);
       if (chatMessages.length > 0) {
         setMessages(chatMessages);
         localStorage.setItem('chatMessages', JSON.stringify(chatMessages));
       } else {
-        // If no messages loaded, check if it's because of an error or just no messages
         const { success, error: loadError } = await getChatMessages(chatId);
         if (!success && loadError) {
           setError(`Não foi possível carregar histórico: ${loadError}`);
         }
-        // Still allow the chat to be open with empty messages
         setMessages([]);
       }
     } catch (err) {
@@ -219,7 +197,6 @@ const Chat = () => {
     }
   };
   
-  // Send a message
   const sendMessage = async () => {
     if (!newMessage.trim() || !selectedContact) return;
     
@@ -231,14 +208,15 @@ const Chat = () => {
       time: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
     };
     
-    // Update state and save to localStorage (optimistic update)
     const updatedMessages = [...messages, message];
     setMessages(updatedMessages);
     localStorage.setItem('chatMessages', JSON.stringify(updatedMessages));
     setNewMessage('');
     
+    // Add contact to recent conversations BEFORE sending (ensure it's saved)
+    addToRecentConversations(selectedContact);
+    
     try {
-      // Send message via API
       const response = await sendMessageService(selectedContact.id, {
         conteudo: messageText,
         id_user: 1
@@ -247,15 +225,12 @@ const Chat = () => {
       if (!response.success) {
         console.error('Error sending message:', response.error);
         setError(response.error || 'Erro ao enviar mensagem');
-        // Revert on error
-        setMessages(messages);
-        setNewMessage(messageText);
+        // Don't revert - keep the message and recent conversation saved
         return;
       }
       
       setError(null);
       
-      // Also send via socket for real-time updates
       if (socketRef.current) {
         socketRef.current.emit('SendMessage', {
           id_chat: selectedContact.id,
@@ -265,13 +240,10 @@ const Chat = () => {
       }
     } catch (err) {
       console.error('Error sending message:', err);
-      // Revert the message if sending fails
-      setMessages(messages);
-      setNewMessage(messageText);
+      // Don't revert - keep the message and recent conversation saved
     }
   };
 
-  // Handle search with debounce
   const handleSearch = async (term) => {
     if (!term.trim()) {
       setContacts([]);
@@ -286,7 +258,6 @@ const Chat = () => {
                    localStorage.getItem('access_token') ||
                    '';
 
-      // Make API call to search for contacts
       const response = await fetch(`${API_BASE_URL}/filter/nameDoctors`, {
         method: 'POST',
         headers: {
@@ -305,13 +276,11 @@ const Chat = () => {
 
       const data = await response.json();
       
-      // Transform the API response to match our contact structure
       if (data.Médicos && Array.isArray(data.Médicos)) {
         const mappedContacts = data.Médicos.map(medico => ({
           id: medico.id_medico || medico.id || Math.random().toString(),
           nome: medico.nome_medico || medico.nome || 'Médico sem nome',
           tipo: 'doctor',
-          // Add any other fields you need from the API response
           ...medico
         }));
         setContacts(mappedContacts);
@@ -326,7 +295,6 @@ const Chat = () => {
     }
   };
 
-  // Debounced search effect
   useEffect(() => {
     if (searchTimeoutRef.current) {
       clearTimeout(searchTimeoutRef.current);
@@ -334,7 +302,7 @@ const Chat = () => {
 
     searchTimeoutRef.current = setTimeout(() => {
       handleSearch(searchTerm);
-    }, 300); // 300ms debounce
+    }, 300);
 
     return () => {
       if (searchTimeoutRef.current) {
@@ -343,14 +311,12 @@ const Chat = () => {
     };
   }, [searchTerm]);
   
-  // Auto-scroll to bottom when messages change
   useEffect(() => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [messages]);
   
-  // Handle Enter key for sending messages
   const handleKeyPress = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -391,31 +357,54 @@ const Chat = () => {
               <div className="flex justify-center p-4">
                 <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
               </div>
-            ) : contacts.length === 0 ? (
-              <div className="text-center p-4 text-gray-500">
-                Nenhum contato encontrado
-              </div>
-            ) : (
-              contacts.map((contact) => (
-                <div 
-                  key={contact.id} 
-                  className={`contact-item ${selectedContact?.id === contact.id ? 'selected' : ''}`}
-                  onClick={() => selectContact(contact)}
-                >
-                  <div className="contact-avatar">
-                    {contact.nome?.charAt(0).toUpperCase()}
-                  </div>
-                  <div>
-                    <div className="contact-name">{contact.nome}</div>
-                    <div className="contact-type">{contact.tipo}</div>
-                  </div>
+            ) : searchTerm.trim() ? (
+              contacts.length === 0 ? (
+                <div className="text-center p-4 text-gray-500">
+                  Nenhum contato encontrado
                 </div>
-              ))
+              ) : (
+                contacts.map((contact) => (
+                  <div 
+                    key={contact.id} 
+                    className={`contact-item ${selectedContact?.id === contact.id ? 'selected' : ''}`}
+                    onClick={() => selectContact(contact)}
+                  >
+                    <div className="contact-avatar">
+                      {contact.nome?.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <div className="contact-name">{contact.nome}</div>
+                      <div className="contact-type">{contact.tipo}</div>
+                    </div>
+                  </div>
+                ))
+              )
+            ) : (
+              recentConversations.length === 0 ? (
+                <div className="text-center p-4 text-gray-500">
+                  Nenhuma conversa recente. Busque um contato para começar.
+                </div>
+              ) : (
+                recentConversations.map((contact) => (
+                  <div 
+                    key={contact.id} 
+                    className={`contact-item ${selectedContact?.id === contact.id ? 'selected' : ''}`}
+                    onClick={() => selectContact(contact)}
+                  >
+                    <div className="contact-avatar">
+                      {contact.nome?.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <div className="contact-name">{contact.nome}</div>
+                      <div className="contact-type">{contact.tipo}</div>
+                    </div>
+                  </div>
+                ))
+              )
             )}
           </div>
         </div>
 
-        {/* Chat Area */}
         {selectedContact ? (
           <div className="chat-area">
             <div className="chat-header">

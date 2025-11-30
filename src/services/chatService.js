@@ -122,22 +122,38 @@ export const sendMessage = async (chatId, messageData) => {
 
 export const getChatMessages = async (chatId) => {
   try {
-    const response = await fetch(`${API_BASE_URL}/chat/message/${chatId}`);
+    // Try primary endpoint first
+    const response = await fetch(`${API_BASE_URL}/chats/messages`);
     const data = await response.json();
 
-    if (!response.ok) {
-      console.error('Get messages error response:', data);
+    if (response.ok) {
       return {
-        success: false,
-        data: [],
-        error: data.message || 'Falha ao buscar mensagens'
+        success: true,
+        data: data.data || data || [],
+        error: null
       };
     }
 
+    // If primary endpoint fails, try alternative endpoint
+    console.log('Primary endpoint failed, trying alternative /chatMessages endpoint');
+    const alternativeResponse = await fetch(`${API_BASE_URL}/chatMessages/${chatId}`);
+    const alternativeData = await alternativeResponse.json();
+
+    if (alternativeResponse.ok) {
+      console.log('Alternative endpoint succeeded');
+      return {
+        success: true,
+        data: alternativeData.data || alternativeData || [],
+        error: null
+      };
+    }
+
+    // If both fail, return error
+    console.error('Both endpoints failed. Primary:', data, 'Alternative:', alternativeData);
     return {
-      success: true,
-      data: data.data || data || [],
-      error: null
+      success: false,
+      data: [],
+      error: data.message || alternativeData.message || 'Falha ao buscar mensagens'
     };
   } catch (error) {
     console.error('Error fetching messages:', error);
