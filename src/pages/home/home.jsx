@@ -268,7 +268,7 @@ export default function Home() {
     navigate('/home');
   };
    const handleChat = () => {
-    navigate('/');
+    navigate('/chat');
   };
 
 
@@ -311,20 +311,22 @@ export default function Home() {
         <section className="services">
           <h2>Serviços</h2>
           <div className="services-grid">
-            <div className="service">
+            <div className="service" onClick={() => {
+              document.querySelector('.chat-ia-section')?.scrollIntoView({ behavior: 'smooth' });
+            }} style={{ cursor: 'pointer' }}>
               <div className="service-icon">🤖</div>
               <h3>AI</h3>
               <p>Somos uma time que auxilia pais de primeira viagem e pai mais solo.</p>
             </div>
-            <div className="service">
+            <div className="service" onClick={handleChat} style={{ cursor: 'pointer' }}>
               <div className="service-icon">💬</div>
               <h3>Chat com médico</h3>
               <p>Funcionalidade com uma plataforma aferideelat</p>
             </div>
-            <div className="service">
-              <div className="service-icon">📄</div>
-              <h3>Relatórios</h3>
-              <p>Oferecemos auxílio tecnológico que oferece a aferideelat</p>
+            <div className="service" onClick={handleRotina} style={{ cursor: 'pointer' }}>
+              <div className="service-icon">📋</div>
+              <h3>Rotina</h3>
+              <p>Acompanhe e gerencie as rotinas do seu bebê</p>
             </div>
           </div>
         </section>

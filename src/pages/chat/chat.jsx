@@ -136,7 +136,7 @@ const Chat = () => {
           </div>
         </div>
 
-        {/* ... rest of the JSX remains the same ... */}
+        
       </div>
     </div>
   );
