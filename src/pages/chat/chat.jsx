@@ -22,38 +22,58 @@ const Chat = () => {
   // ... (socket initialization and other effects remain the same)
 
   // Handle search with debounce
-  const handleSearch = async (term) => {
-    if (!term.trim()) {
+const handleSearch = async (term) => {
+  if (!term.trim()) {
+    setContacts([]);
+    return;
+  }
+
+  try {
+    setSearchLoading(true);
+
+    const token = localStorage.getItem('token') ||
+                  localStorage.getItem('authToken') ||
+                  localStorage.getItem('access_token') ||
+                  '';
+
+    const response = await fetch(`${API_BASE_URL}/filter/nameDoctors`, {
+  method: 'POST',
+  headers: {
+    'Authorization': `Bearer ${token}`,
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({ nome: term })
+});
+
+const data = await response.json();
+
+// DEBUG TEMPORÁRIO
+console.log("ENVIADO PARA O BACK:", { nome: term });
+console.log("RESPOSTA DO BACK:", data);
+
+    // SE O BACK RETORNAR STATUS 500
+    if (!response.ok) {
+      console.error('Erro do servidor:', data);
       setContacts([]);
       return;
     }
 
-    try {
-      setSearchLoading(true);
-      const token = localStorage.getItem('token') || 
-                   localStorage.getItem('authToken') || 
-                   localStorage.getItem('access_token') || '';
-      
-      const response = await fetch(`${API_BASE_URL}/filter/nameDoctors?name=${encodeURIComponent(term)}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to search doctors');
-      }
-
-      const data = await response.json();
-      setContacts(Array.isArray(data) ? data : []);
-    } catch (err) {
-      console.error('Error searching doctors:', err);
+    // SE ACHOU MÉDICOS
+    if (data.Médicos && Array.isArray(data.Médicos)) {
+      setContacts(data.Médicos);
+    } else {
       setContacts([]);
-    } finally {
-      setSearchLoading(false);
     }
-  };
+
+  } catch (err) {
+    console.error('Erro ao buscar médicos:', err);
+    setContacts([]);
+  } finally {
+    setSearchLoading(false);
+  }
+};
+
+
 
   // Debounced search effect
   useEffect(() => {
@@ -124,10 +144,10 @@ const Chat = () => {
                   onClick={() => setSelectedContact(contact)}
                 >
                   <div className="contact-avatar">
-                    {contact.name?.charAt(0).toUpperCase()}
+                    {contact.nome?.charAt(0).toUpperCase()}
                   </div>
                   <div>
-                    <div className="contact-name">{contact.name}</div>
+                    <div className="contact-name">{contact.nome}</div>
                     <div className="contact-type">Médico(a)</div>
                   </div>
                 </div>
