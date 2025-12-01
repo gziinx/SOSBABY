@@ -268,7 +268,7 @@ export default function HomeMedico() {
     navigate('/home');
   };
    const handleChat = () => {
-    navigate('/chat');
+    navigate('/doctorchat');
   };
 
 

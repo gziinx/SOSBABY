@@ -1,4 +1,4 @@
-.consultation-container {
+.create-call-container {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -8,7 +8,7 @@
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-.consultation-card {
+.create-call-card {
   background: white;
   border-radius: 16px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
@@ -20,7 +20,7 @@
   overflow: hidden;
 }
 
-.consultation-card::before {
+.create-call-card::before {
   content: '';
   position: absolute;
   top: 0;
@@ -30,7 +30,7 @@
   background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
 }
 
-.consultation-title {
+.create-call-title {
   color: #2c3e50;
   margin-bottom: 30px;
   font-size: 28px;
@@ -39,7 +39,7 @@
   padding-bottom: 15px;
 }
 
-.consultation-title::after {
+.create-call-title::after {
   content: '';
   position: absolute;
   bottom: 0;
@@ -51,7 +51,7 @@
   border-radius: 3px;
 }
 
-.consultation-input {
+.create-call-input {
   width: 100%;
   padding: 15px 20px;
   border: 2px solid #e0e6ed;
@@ -62,13 +62,13 @@
   box-sizing: border-box;
 }
 
-.consultation-input:focus {
+.create-call-input:focus {
   border-color: #4facfe;
   box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.2);
   outline: none;
 }
 
-.consultation-button {
+.create-call-button {
   background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
   color: white;
   border: none;
@@ -83,41 +83,77 @@
   letter-spacing: 1px;
   width: 100%;
   max-width: 200px;
+  margin: 0 auto;
 }
 
-.consultation-button:hover {
+.create-call-button:hover:not(:disabled) {
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(79, 172, 254, 0.4);
 }
 
-.consultation-button:active {
+.create-call-button:active:not(:disabled) {
   transform: translateY(0);
 }
 
-.consultation-icon {
+.create-call-button:disabled {
+  background: #cccccc;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.create-call-icon {
   font-size: 60px;
   color: #4facfe;
   margin-bottom: 20px;
 }
 
-.consultation-note {
+.create-call-note {
   color: #7f8c8d;
   font-size: 14px;
   margin-top: 20px;
   line-height: 1.5;
 }
 
+.create-call-error {
+  color: #e74c3c;
+  margin-top: 15px;
+  font-size: 14px;
+  min-height: 20px;
+}
+
+/* Loading animation */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.button-loading {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.button-loading::after {
+  content: '';
+  width: 16px;
+  height: 16px;
+  border: 2px solid #ffffff;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-left: 8px;
+}
+
 /* Responsive Design */
 @media (max-width: 600px) {
-  .consultation-card {
+  .create-call-card {
     padding: 30px 20px;
   }
   
-  .consultation-title {
+  .create-call-title {
     font-size: 24px;
   }
   
-  .consultation-button {
+  .create-call-button {
     padding: 12px 30px;
     font-size: 15px;
   }
