@@ -225,19 +225,69 @@ export default function Home() {
         `).join('');
         tooltipContainer.appendChild(tooltip);
 
+        // Inicialmente esconder o tooltip
+        tooltip.style.display = 'none';
+        tooltip.style.visibility = 'hidden';
+        tooltip.style.opacity = '0';
+        
         dia.addEventListener('mouseenter', () => {
+          console.log('Mouse enter no dia');
+          
+          // Primeiro, tornar o tooltip visível para calcular as dimensões
           tooltip.style.display = 'block';
+          tooltip.style.visibility = 'hidden';
+          tooltip.style.opacity = '0';
+          
+          // Forçar o navegador a recalcular o layout
+          void tooltip.offsetHeight;
+          
+          // Obter a posição do dia
           const rect = dia.getBoundingClientRect();
-          const top = rect.top + window.scrollY - tooltip.offsetHeight - 8;
-          const left = rect.left + window.scrollX + rect.width/2 - tooltip.offsetWidth/2;
-          const screenWidth = document.documentElement.clientWidth;
+          
+          // Obter as dimensões do tooltip
+          const tooltipWidth = tooltip.offsetWidth;
+          const tooltipHeight = tooltip.offsetHeight;
+          
+          console.log('Dimensões do tooltip:', { width: tooltipWidth, height: tooltipHeight });
+          
+          // Calcular a posição centralizada horizontalmente
+          let left = rect.left + (rect.width / 2) - (tooltipWidth / 2);
+          
+          // Ajustar para não sair da tela
+          left = Math.max(10, left);
+          left = Math.min(left, window.innerWidth - tooltipWidth - 10);
+          
+          // Posicionar acima do dia
+          const top = rect.top - tooltipHeight - 5;
+          
+          console.log('Posicionando tooltip em:', { top, left });
+          
+          // Aplicar posições
+          tooltip.style.position = 'fixed';
+          tooltip.style.left = `${left}px`;
           tooltip.style.top = `${top}px`;
-          tooltip.style.left = `${Math.max(10, Math.min(left, screenWidth - tooltip.offsetWidth - 10))}px`;
-          setTimeout(() => tooltip.classList.add('show'), 10);
+          
+          // Forçar renderização antes de mostrar
+          void tooltip.offsetHeight;
+          
+          // Tornar visível com transição suave
+          tooltip.style.visibility = 'visible';
+          tooltip.style.opacity = '1';
+          tooltip.classList.add('show');
         });
+        
         dia.addEventListener('mouseleave', () => {
+          console.log('Mouse leave do dia');
           tooltip.classList.remove('show');
-          setTimeout(() => { if (!tooltip.classList.contains('show')) tooltip.style.display = 'none'; }, 200);
+          tooltip.style.opacity = '0';
+          
+          setTimeout(() => {
+            if (!tooltip.classList.contains('show')) {
+              tooltip.style.display = 'none';
+              tooltip.style.visibility = 'hidden';
+              tooltip.style.position = 'absolute'; // Reset para o próximo uso
+            }
+          }, 200);
         });
       });
     }
@@ -256,7 +306,7 @@ export default function Home() {
     navigate('/calendario');
   };
   const handleConsulta = () => {
-    navigate('/conulta');
+    navigate('/consulta');
   };
   const handleRotina = () => {
     navigate('/rotina');
