@@ -384,7 +384,7 @@ export default function Home() {
         {/* Calendar */}
         <section className="calendar-section">
           <div className="titu">
-            <a>Seu Calendário de Rotinas</a>
+            <a>Lembretes</a>
           </div>
           <p>
             Acompanhe consultas, vacinas e lembretes importantes para o bem-

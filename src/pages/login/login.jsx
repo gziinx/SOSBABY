@@ -91,7 +91,7 @@ function Login() {
         navigate("/cadmedico");
       } 
       else if (tipo === "Responsável") {
-        navigate("/cadrespon");
+        navigate("/home");
       } 
       else {
         navigate("/");
