@@ -474,9 +474,6 @@ export default function Calendarioo() {
   const handlerCalendar = () => {
     navigate('/calendario');
   };
-  const handlerDicas = () => {
-    navigate('/dicass');
-  };
   const handlerConsulta = () => {
     navigate('/consulta');
   };
@@ -495,7 +492,6 @@ export default function Calendarioo() {
           <div className="nav-center">
             <a href="" onClick={handlerHome}>Home</a>
             <a href="" onClick={handlerCalendar}>Calendário</a>
-            <a href="" onClick={handlerDicas}>Dicas</a>
             <a href="" onClick={handlerConsulta} >Consultas</a>
             <a href="" onClick={handlerRotina} >Rotina</a>
           </div>

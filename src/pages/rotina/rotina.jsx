@@ -1,11 +1,35 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './rotina.css';
 import logo from '../../assets/logoo.png';
+
 const Rotina = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [rotinas, setRotinas] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showForm, setShowForm] = useState(false);
+  const navigate = useNavigate();
+
+  // Funções de navegação
+  const handleCalendar = (e) => {
+    e.preventDefault();
+    navigate('/calendario');
+  };
+
+  const handleConsulta = (e) => {
+    e.preventDefault();
+    navigate('/consulta');
+  };
+
+  const handlePerfil = () => {
+    navigate('/perfil');
+  };
+
+  const handleHome = (e) => {
+    e.preventDefault();
+    navigate('/home');
+  };
+
   const [formData, setFormData] = useState({
     titulo: '',
     cor: '#000000',
@@ -343,6 +367,23 @@ console.log(rotinaData)
     const step = onboardingSteps[currentStep];
     return (
       <div className="rotina-container">
+        <header>
+          <nav className="navi">
+            <div className="nav-left">
+              <img src={logo} alt="SOS Baby" className="logu" />
+            </div>
+            <div className="nav-center">
+              <a href="" onClick={handleHome}>Home</a>
+              <a href="" onClick={handleCalendar}>Calendário</a>
+              <a href="" onClick={handleConsulta}>Consultas</a>
+              <a href="" onClick={(e) => e.preventDefault()}>Rotina</a>
+            </div>
+            <div className="nav-right" onClick={handlePerfil}>
+              <i data-lucide="bell" className="icon"></i>
+              <i data-lucide="user" className="icon user-icon"></i>
+            </div>
+          </nav>
+        </header>
         
         <div className="onboarding-screen">
           <div className="onboarding-content">

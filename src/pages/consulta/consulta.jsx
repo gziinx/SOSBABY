@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./consulta.css";
 import { FaVideo, FaUserMd } from "react-icons/fa";
+import logo from '../../assets/logoo.png';
 
 export default function JoinRoom() {
   const [roomName, setRoomName] = useState("");
@@ -24,8 +25,45 @@ export default function JoinRoom() {
     }, 800);
   }
 
+  const handleCalendar = (e) => {
+    e.preventDefault();
+    navigate('/calendario');
+  };
+  
+  const handleRotina = (e) => {
+    e.preventDefault();
+    navigate('/rotina');
+  };
+  
+  const handlePerfil = () => {
+    navigate('/perfil');
+  };
+  
+  const handleHome = (e) => {
+    e.preventDefault();
+    navigate('/home');
+  };
+
   return (
-    <div className="consultation-container">
+    <>
+      <header>
+        <nav className="nav">
+          <div className="nav-left">
+            <img src={logo} alt="SOS Baby" className="logu" />
+          </div>
+          <div className="nav-center">
+            <a href="" onClick={handleHome}>Home</a>
+            <a href="" onClick={handleCalendar}>Calendário</a>
+            <a href="" onClick={(e) => e.preventDefault()}>Consultas</a>
+            <a href="" onClick={handleRotina}>Rotina</a>
+          </div>
+          <div className="nav-right" onClick={handlePerfil}>
+            <i data-lucide="bell" className="icon"></i>
+            <i data-lucide="user" className="icon user-icon"></i>
+          </div>
+        </nav>
+      </header>
+      <div className="consultation-container">
       <div className="consultation-card">
         <div className="consultation-icon">
           <FaVideo />
@@ -60,5 +98,6 @@ export default function JoinRoom() {
         </p>
       </div>
     </div>
+    </>
   );
 }
