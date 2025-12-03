@@ -1,5 +1,107 @@
 const API_BASE_URL = 'https://backend-sosbaby.onrender.com/v1/sosbaby';
 
+
+export const searchResp = async (searchTerm, token) => {
+  try {
+    console.log('Iniciando busca de responsáveis...');
+    console.log('URL da requisição:', `${API_BASE_URL}/filter/nameResp`);
+    console.log('Termo de busca:', searchTerm);
+    
+    const response = await fetch(`${API_BASE_URL}/filter/nameResp`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ name: searchTerm })  // Note que aqui é 'name' e não 'nome'
+    });
+
+    console.log('Status da resposta:', response.status);
+    const responseText = await response.text();
+    console.log('Resposta bruta:', responseText);
+    
+    let data;
+    try {
+      data = JSON.parse(responseText);
+    } catch (e) {
+      console.error('Erro ao fazer parse do JSON:', e);
+      throw new Error('Resposta inválida do servidor');
+    }
+
+    if (!response.ok) {
+      return {
+        success: false,
+        data: [],
+        error: data.message || 'Falha ao buscar responsáveis'
+      };
+    }
+
+    // Ajuste para a estrutura correta da resposta
+    return {
+      success: true,
+      data: data, // Mantemos o objeto completo da resposta
+      error: null
+    };
+  } catch (error) {
+    console.error('Error searching responsáveis:', error);
+    return {
+      success: false,
+      data: [],
+      error: error.message || 'Erro de rede'
+    };
+  }
+};
+
+export const searchDoctors = async (searchTerm, token) => {
+  try {
+    console.log('Iniciando busca de médicos...');
+    console.log('URL da requisição:', `${API_BASE_URL}/filter/nameDoctors`);
+    console.log('Termo de busca:', searchTerm);
+    
+    const response = await fetch(`${API_BASE_URL}/filter/nameDoctors`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ nome: searchTerm })
+    });
+
+    console.log('Status da resposta:', response.status);
+    const responseText = await response.text();
+    console.log('Resposta bruta:', responseText);
+    
+    let data;
+    try {
+      data = JSON.parse(responseText);
+    } catch (e) {
+      console.error('Erro ao fazer parse do JSON:', e);
+      throw new Error('Resposta inválida do servidor');
+    }
+
+    if (!response.ok) {
+      return {
+        success: false,
+        data: [],
+        error: data.message || 'Falha ao buscar médicos'
+      };
+    }
+
+    return {
+      success: true,
+      data: data.data || data,
+      error: null
+    };
+  } catch (error) {
+    console.error('Error searching doctors:', error);
+    return {
+      success: false,
+      data: [],
+      error: error.message || 'Erro de rede'
+    };
+  }
+};
+
 export const createChat = async (chatName) => {
   try {
     const response = await fetch(`${API_BASE_URL}/chat/cadastro`, {
