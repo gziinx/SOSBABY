@@ -332,7 +332,6 @@ export default function Home() {
           <div className="nav-center">
             <a href="" onClick={handleHome}>Home</a>
             <a href="" onClick={handleCalendar}>Calendário</a>
-            <a href="">Dicas</a>
             <a href="" onClick={handleConsulta}>Consultas</a>
             <a href="" onClick={handleRotina}>Rotina</a>
           </div>

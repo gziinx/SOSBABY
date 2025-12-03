@@ -88,7 +88,7 @@ function Login() {
         navigate("/cadclinica");
       } 
       else if (tipo === "Médico") {
-        navigate("/cadmedico");
+        navigate("/homemedico");
       } 
       else if (tipo === "Responsável") {
         navigate("/home");

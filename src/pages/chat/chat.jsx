@@ -340,18 +340,25 @@ const Chat = () => {
           <div className="sidebar-header p-6 border-b border-gray-200">
             <div className="flex items-center gap-4 mb-4">
               <div className="search-container w-full relative">
-                <div className="icon-search-container">
-                  <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
+                <div className="relative w-full" style={{ minWidth: '200px' }}>
+                  <input 
+                    type="text" 
+                    placeholder="Buscar médicos..."
+                    className="search-input pl-4 pr-10 py-2.5 w-full bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-200 focus:border-blue-400 focus:outline-none transition-all duration-200"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    style={{
+                      boxShadow: '0 2px 6px rgba(0, 0, 0, 0.1)',
+                      paddingRight: '2.5rem',
+                      minWidth: '100%'
+                    }}
+                  />
+                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" style={{ right: '0.75rem' }}>
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                  </div>
                 </div>
-                <input 
-                  type="text" 
-                  placeholder="Buscar médicos..."
-                  className="search-input"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
                 {searchLoading && (
                   <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
@@ -427,7 +434,17 @@ const Chat = () => {
         {selectedContact ? (
           <div className="chat-area">
             <div className="chat-header">
-              <div className="chat-contact-info">
+            <button 
+              onClick={() => window.location.href = '/consulta'}
+              className="camera-button"
+              aria-label="Ir para consulta"
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                <circle cx="12" cy="13" r="4"></circle>
+              </svg>
+            </button>
+            <div className="chat-contact-info">
                 <div className="contact-avatar">
                   {selectedContact.nome?.charAt(0).toUpperCase()}
                 </div>
