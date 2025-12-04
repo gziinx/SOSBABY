@@ -9,7 +9,7 @@ import './chat.css';
 const API_BASE_URL = 'https://backend-sosbaby.onrender.com/v1/sosbaby';
 const SOCKET_URL = 'https://backend-sosbaby.onrender.com';
 
-const Chat = () => {
+const DoctorChat = () => {
   const [recentConversations, setRecentConversations] = useState(() => {
     const saved = localStorage.getItem('recentConversations');
     return saved ? JSON.parse(saved) : [];
@@ -42,183 +42,309 @@ const Chat = () => {
   }, []);
 
   // Receber mensagem via socket
-const handleIncomingMessage = useCallback(
-  (incomingMessage) => {
-    if (!selectedContact) return;
+  const handleIncomingMessage = useCallback(
+    (msg) => {
+      if (!selectedContact) return;
 
-    const text = incomingMessage?.conteudo || incomingMessage?.mensagem_enviada?.mensagem || '';
-    const createdRaw = incomingMessage?.created_at || incomingMessage?.mensagem_enviada?.hora_envio;
-    const idUser = incomingMessage?.id_user;
+      const text = msg?.conteudo || msg?.mensagem_enviada?.mensagem || '';
+      const createdRaw = msg?.created_at || msg?.mensagem_enviada?.hora_envio;
+      const idUser = msg?.id_user;
+      
+      // Obter ID do usuário atual para verificar se a mensagem é do usuário atual
+      const currentUserId = getUserId();
+      const isFromMe = idUser === currentUserId;
 
-    let ts = '';
-    if (createdRaw) {
-      const d = new Date(createdRaw);
-      ts = !isNaN(d.getTime())
-        ? d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
-        : '';
-    }
-
-    if (!ts) {
-      ts = new Date().toLocaleTimeString('pt-BR', {
-        hour: '2-digit',
-        minute: '2-digit'
-      });
-    }
-
-    // In doctor's interface, all incoming messages are from the patient
-    // In handleIncomingMessage
-const message = {
-  id: Date.now().toString(),
-  text,
-  sender: 'contact', // Changed from 'them' to 'contact'
-  time: ts
-};
-
-// In sendMessage
-const msg = {
-  id: Date.now().toString(),
-  text: newMessage,
-  sender: 'user', // Changed from 'me' to 'user'
-  time: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
-};
-
-    setMessages((prev) => {
-      const updated = [...prev, message];
-      localStorage.setItem(`chatMessages_${selectedContact.id}`, JSON.stringify(updated));
-      return updated;
-    });
-  },
-  [selectedContact]
-);
-
-  // Carregar mensagens do backend
-  const loadMessages = useCallback(async (chatId) => {
-    try {
-      const saved = localStorage.getItem(`chatMessages_${chatId}`);
-      if (saved) {
-        return JSON.parse(saved);
+      let ts = '';
+      if (createdRaw) {
+        const d = new Date(createdRaw);
+        ts = !isNaN(d.getTime())
+          ? d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+          : '';
       }
 
-      const { success, data } = await getChatMessages(chatId);
-      if (!success) return [];
+      if (!ts) {
+        ts = new Date().toLocaleTimeString('pt-BR', {
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+      }
 
-      let items = Array.isArray(data) ? data : data?.chat_messages || [];
+      const message = {
+        id: Date.now().toString(),
+        text,
+        sender: isFromMe ? 'me' : 'them',
+        time: ts
+      };
 
-      const formatted = items.map((msg) => {
-        const text = msg.conteudo || msg?.mensagem_enviada?.mensagem || '';
-        const createdRaw = msg.created_at || msg?.mensagem_enviada?.hora_envio;
-        const idUser = msg.id_user;
-
-        let ts = '';
-        if (createdRaw) {
-          const d = new Date(createdRaw);
-          ts = !isNaN(d.getTime())
-            ? d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
-            : '';
-        }
-
-        return {
-          id: msg.id_message || msg.id || String(Math.random()),
-          text,
-          sender: idUser == 1 ? 'me' : 'them',
-          time: ts
-        };
+      setMessages((prev) => {
+        const updated = [...prev, message];
+        localStorage.setItem(`chatMessages_${selectedContact.id}`, JSON.stringify(updated));
+        return updated;
       });
-
-      localStorage.setItem(`chatMessages_${chatId}`, JSON.stringify(formatted));
-      return formatted;
-    } catch (err) {
-      console.error(err);
-      return [];
-    }
-  }, []);
-
-  // Criar novo chat caso não exista
-  const createNewChat = async (contact) => {
+    },
+    
+  );
+  const getUserId = () => {
     try {
-      const response = await createChat(contact.nome);
-      if (!response.success) return null;
-
-      const chatId = response.data?.id_chat || response.data?.id;
-      if (!chatId) return null;
-
-      const map = { ...chatIdByContact, [contact.id]: String(chatId) };
-
-      setChatIdByContact(map);
-      localStorage.setItem('chatIdByContact', JSON.stringify(map));
-
-      return chatId;
-    } catch {
+      const userData = localStorage.getItem('user');
+      if (!userData) {
+        console.error('Dados do usuário não encontrados no localStorage');
+        return null;
+      }
+      const user = JSON.parse(userData);
+      return user.id_user || null;
+    } catch (error) {
+      console.error('Erro ao obter ID do usuário:', error);
       return null;
     }
   };
 
-  // Selecionar contato
-  const selectContact = async (contact) => {
-    setLoading(true);
-    setError(null);
 
-    try {
-      let chatId = chatIdByContact[contact.id];
-      if (!chatId) {
-        chatId = await createNewChat(contact);
-        if (!chatId) {
-          setError('Falha ao criar chat');
-          setLoading(false);
-          return;
-        }
-      }
-
-      socketRef.current.emit('joinChat', chatId);
-      setSelectedContact({ ...contact, id: chatId });
-
-      const chatMessages = await loadMessages(chatId);
-      setMessages(chatMessages);
-    } catch (err) {
-      setError('Erro ao abrir chat');
-    } finally {
-      setLoading(false);
+  // Carregar mensagens do backend
+ const loadMessages = useCallback(async (chatId) => {
+  try {
+    const currentUserId = getUserId();
+    if (!currentUserId) {
+      console.error('Usuário não autenticado');
+      return [];
     }
-  };
 
-  // Enviar mensagem
-const sendMessage = async () => {
-  if (!newMessage.trim() || !selectedContact) return;
+    const messages = await getChatMessages(chatId);
+    
+    // Verificar se há mensagens no localStorage
+    const savedMessages = localStorage.getItem(`chatMessages_${chatId}`);
+    let localMessages = [];
+    
+    if (savedMessages) {
+      try {
+        localMessages = JSON.parse(savedMessages);
+      } catch (e) {
+        console.error('Erro ao carregar mensagens locais:', e);
+      }
+    }
 
-  const msg = {
-    id: Date.now().toString(),
-    text: newMessage,
-    sender: 'user', // Changed from 'me' to 'user'
-    time: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
-    id_user: 1 // Doctor's ID
-  };
+    // Combinar mensagens do servidor com as locais
+    const allMessages = [...messages, ...localMessages]
+      // Remover duplicatas pelo ID da mensagem
+      .filter((msg, index, self) => 
+        index === self.findIndex(m => m.id === msg.id)
+      )
+      // Ordenar por data (mais antigas primeiro)
+      .sort((a, b) => {
+        const dateA = a.created_at ? new Date(a.created_at) : new Date();
+        const dateB = b.created_at ? new Date(b.created_at) : new Date();
+        return dateA - dateB;
+      })
+      // Mapear para o formato esperado pelo componente
+      .map(msg => {
+        const isFromMe = String(msg.id_user) === String(currentUserId);
+        return {
+          id: msg.id || Date.now().toString(),
+          text: msg.text || msg.conteudo || '',
+          sender: isFromMe ? 'me' : 'them',
+          time: msg.created_at 
+            ? new Date(msg.created_at).toLocaleTimeString('pt-BR', { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+              })
+            : new Date().toLocaleTimeString('pt-BR', { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+              }),
+          // Manter os dados originais para referência
+          original: msg
+        };
+      });
 
-  const updated = [...messages, msg];
-  setMessages(updated);
-  localStorage.setItem(`chatMessages_${selectedContact.id}`, JSON.stringify(updated));
+    console.log('Mensagens carregadas e processadas:', allMessages);
+    return allMessages;
 
-  setNewMessage('');
+  } catch (error) {
+    console.error('Erro ao carregar mensagens:', error);
+    return [];
+  }
+}, [getUserId]);
+
+  // Criar novo chat caso não exista
+// Helper: normaliza a chave do contato para mapear chatId
+const getContactKey = (contact) => {
+  // Prioriza propriedades que comumente aparecem no seu app
+  return String(contact.id ?? contact.id_user ?? contact.id_responsavel ?? contact.originalId ?? contact.cpf ?? '');
+};
+
+// Criar novo chat caso não exista (ajustada para usar getContactKey)
+const createNewChat = async (contact) => {
+  try {
+    const currentUserId = getUserId();
+    if (!currentUserId) {
+      console.error('Usuário não autenticado');
+      return null;
+    }
+    
+    const response = await createChat(currentUserId, contact.id_user ?? contact.id);
+    if (!response?.success) {
+      console.error('Falha ao criar chat:', response?.error ?? response);
+      return null;
+    }
+
+    const chatId = response.data?.id_chat ?? response.data?.id;
+    if (!chatId) {
+      console.error('ID do chat inválido na resposta:', response.data);
+      return null;
+    }
+
+    // Atualiza o mapeamento com a chave normalizada
+    const key = getContactKey(contact);
+    const map = { ...chatIdByContact, [key]: String(chatId) };
+    setChatIdByContact(map);
+    localStorage.setItem('chatIdByContact', JSON.stringify(map));
+
+    return String(chatId);
+  } catch (error) {
+    console.error('Erro ao criar novo chat:', error);
+    return null;
+  }
+};
+
+// Selecionar contato (refatorada para checar várias fontes e sempre setar selectedContact.chatId)
+const selectContact = async (contact) => {
+  setLoading(true);
+  setError(null);
 
   try {
-    const response = await sendMessageService(selectedContact.id, {
-      conteudo: msg.text,
-      id_user: 1
-    });
-
-    if (!response.success) {
-      setError('Falha ao enviar mensagem');
+    const currentUserId = getUserId();
+    if (!currentUserId) {
+      setError('Usuário não autenticado');
+      setLoading(false);
       return;
     }
 
-    socketRef.current.emit('SendMessage', {
-      id_chat: selectedContact.id,
-      conteudo: msg.text,
-      id_user: 1
+    const key = getContactKey(contact);
+
+    // 1) Se o contato já trouxe chatId diretamente (ex.: vindo de recentConversations)
+    let chatId = contact.chatId ? String(contact.chatId) : null;
+
+    // 2) Se não, procurar no mapeamento local
+    if (!chatId && chatIdByContact && chatIdByContact[key]) {
+      chatId = String(chatIdByContact[key]);
+    }
+
+    let isNewChat = !chatId;
+
+    // 3) Se ainda não tem, checar no backend se já existe um chat entre os dois
+    if (!chatId) {
+      const checkResponse = await checkExistingChat(currentUserId, contact.id_user ?? contact.id);
+      if (checkResponse?.success && checkResponse.data?.id_chat) {
+        chatId = String(checkResponse.data.id_chat);
+        isNewChat = false;
+      } else {
+        // 4) Se não existir, criar um novo chat
+        chatId = await createNewChat(contact);
+        if (!chatId) {
+          setError('Falha ao criar ou encontrar chat');
+          setLoading(false);
+          return;
+        }
+        isNewChat = true;
+      }
+
+      // Atualizar o mapeamento local com a chave normalizada
+      const updatedChatMap = {
+        ...chatIdByContact,
+        [key]: String(chatId)
+      };
+      setChatIdByContact(updatedChatMap);
+      localStorage.setItem('chatIdByContact', JSON.stringify(updatedChatMap));
+    }
+
+    console.log('Conectando ao chat ID:', chatId);
+
+    // Emitir join com chatId correto (número
+
+    // Atualizar o contato selecionado com o ID do chat e a chave original
+    setSelectedContact({ 
+      ...contact, 
+      chatId: String(chatId),
+      originalKey: key
     });
+
+    // Carregar as mensagens do chat (usa chatId numérico / string suportado)
+    const chatMessages = await loadMessages(chatId);
+    setMessages(chatMessages);
+
+    // Gerenciar recentConversations apenas se for um novo chat
+    if (isNewChat) {
+      const updatedConversations = [
+        {
+          id: contact.id,
+          nome: contact.nome_medico || contact.nome || 'Contato',
+          tipo: contact.tipo || 'Contato',
+          lastMessage: '',
+          lastMessageTime: new Date().toISOString(),
+          chatId: String(chatId)
+        },
+        ...recentConversations
+      ]
+      // remover duplicatas por id
+      .filter((v, i, arr) => i === arr.findIndex(a => a.id === v.id))
+      .slice(0, 10);
+
+      setRecentConversations(updatedConversations);
+      localStorage.setItem('recentConversations', JSON.stringify(updatedConversations));
+    }
+
   } catch (err) {
-    setError('Erro ao enviar mensagem');
+    console.error('Erro ao abrir chat:', err);
+    setError('Erro ao abrir o chat. Tente novamente.');
+  } finally {
+    setLoading(false);
   }
 };
+
+  // Obter ID do usuário logado
+  
+  // Enviar mensagem
+  const sendMessage = async () => {
+    if (!newMessage.trim() || !selectedContact) return;
+
+    const userId = getUserId();
+    if (!userId) {
+      setError('Usuário não autenticado');
+      return;
+    }
+
+    const chatId = selectedContact.chatId || chatIdByContact[selectedContact.id];
+    if (!chatId) {
+      setError('ID do chat não encontrado');
+      return;
+    }
+
+    try {
+      // Criar o objeto da mensagem
+      const messageData = {
+        id_chat: parseInt(chatId),
+        conteudo: newMessage.trim(),
+        id_user: parseInt(userId),
+        created_at: new Date().toISOString()
+      };
+
+      // Enviar mensagem para o servidor
+      const response = await sendMessageService(chatId, messageData);
+
+      if (!response.success) {
+        throw new Error(response.error || 'Falha ao enviar mensagem');
+      }
+
+      // Enviar mensagem via socket
+      socketRef.current.emit('SendMessage', messageData);
+      
+      // Limpar o campo de mensagem
+      setNewMessage('');
+    } catch (err) {
+      console.error('Erro ao enviar mensagem:', err);
+      setError('Erro ao enviar mensagem. Tente novamente.');
+    }
+  };
 
   // Efeito para buscar médicos quando o termo de busca mudar
   useEffect(() => {
@@ -229,8 +355,7 @@ const sendMessage = async () => {
       console.log('Contatos no estado:', contacts);
     };
 
-    // Função de busca
-  const search = async () => {
+    const search = async () => {
   if (!searchTerm.trim()) {
     console.log('Termo de busca vazio, limpando contatos');
     setContacts([]);
@@ -305,6 +430,9 @@ const sendMessage = async () => {
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
+    // Usar debounce para evitar muitas chamadas enquanto o usuário digita
+
+
   // Efeito para rolagem automática das mensagens
   useEffect(() => {
     if (messagesEndRef.current) {
@@ -347,15 +475,14 @@ const sendMessage = async () => {
                 <div className="relative w-full" style={{ minWidth: '200px' }}>
                   <input 
                     type="text" 
-                    placeholder="Buscar pacientes..."
-                    className="search-input w-full bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-200 focus:border-blue-400 focus:outline-none transition-all duration-200"
+                    placeholder="Buscar pacientes.."
+                    className="search-input pl-4 pr-10 py-2.5 w-full bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-200 focus:border-blue-400 focus:outline-none transition-all duration-200"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     style={{
                       boxShadow: '0 2px 6px rgba(0, 0, 0, 0.1)',
-                      padding: '0.625rem 3rem 0.625rem 1rem',
-                      minWidth: '100%',
-                      height: '2.5rem'
+                      paddingRight: '2.5rem',
+                      minWidth: '100%'
                     }}
                   />
                   <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" style={{ right: '0.75rem' }}>
@@ -383,40 +510,34 @@ const sendMessage = async () => {
                 <div className="text-center p-4 text-gray-500">
                   Nenhum contato encontrado
                 </div>
-              ) : 
-              contacts.map((contact) => (
-  <div 
-    key={contact.id} 
-    className={`contact-item p-3 hover:bg-gray-800 cursor-pointer transition-colors ${selectedContact?.id === contact.id ? 'bg-gray-800' : ''}`}
-    onClick={() => selectContact(contact)}
-  >
-    <div className="flex items-center">
-      <div className="contact-avatar flex-shrink-0 bg-blue-500 text-white rounded-full w-10 h-10 flex items-center justify-center text-lg font-bold">
-        {contact.nome?.charAt(0).toUpperCase()}
-      </div>
-      <div className="ml-3 overflow-hidden">
-        <div className="flex justify-between items-baseline">
-          <div className="contact-name text-white font-medium truncate">
-            {contact.nome}
-          </div>
-          <span className="text-xs text-gray-400 ml-2">
-            {contact.tipo}
-          </span>
-        </div>
-        {contact.telefone && (
-          <div className="text-sm text-gray-400 truncate">
-            {contact.telefone}
-          </div>
-        )}
-        {contact.cpf && (
-          <div className="text-xs text-gray-500 truncate">
-            CPF: {contact.cpf}
-          </div>
-        )}
-      </div>
-    </div>
-  </div>
-  ))) : (
+              ) : (
+                contacts.map((contact) => (
+                  <div 
+                    key={contact.id} 
+                    className={`contact-item p-3 hover:bg-gray-800 cursor-pointer transition-colors ${selectedContact?.id === contact.id ? 'bg-gray-800' : ''}`}
+                    onClick={() => selectContact(contact)}
+                  >
+                    <div className="flex items-center">
+                      <div className="contact-avatar flex-shrink-0 bg-blue-500 text-white rounded-full w-10 h-10 flex items-center justify-center text-lg font-bold">
+                        {contact.nome?.charAt(0).toUpperCase()}
+                      </div>
+                      <div className="ml-3 overflow-hidden">
+                        <div className="flex justify-between items-baseline">
+                          <div className="contact-name text-white font-medium truncate">{contact.nome}</div>
+                          <span className="text-xs text-gray-400 ml-2">{contact.tipo}</span>
+                        </div>
+                        {contact.especialidade && (
+                          <div className="text-sm text-gray-400 truncate">{contact.especialidade}</div>
+                        )}
+                        {contact.email && (
+                          <div className="text-xs text-gray-500 truncate">{contact.email}</div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )
+            ) : (
               recentConversations.length === 0 ? (
                 <div className="text-center p-4 text-gray-500">
                   Nenhuma conversa recente. Busque um contato para começar.
@@ -445,17 +566,17 @@ const sendMessage = async () => {
         {selectedContact ? (
           <div className="chat-area">
             <div className="chat-header">
-              <button 
-                onClick={() => window.location.href = '/criarconsulta'}
-                className="camera-button"
-                aria-label="Criar consulta"
-              >
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
-                  <circle cx="12" cy="13" r="4"></circle>
-                </svg>
-              </button>
-              <div className="chat-contact-info">
+            <button 
+              onClick={() => window.location.href = '/criarconsulta'}
+              className="camera-button"
+              aria-label="Ir para consulta"
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                <circle cx="12" cy="13" r="4"></circle>
+              </svg>
+            </button>
+            <div className="chat-contact-info">
                 <div className="contact-avatar">
                   {selectedContact.nome?.charAt(0).toUpperCase()}
                 </div>
@@ -475,12 +596,12 @@ const sendMessage = async () => {
                   <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
                 </div>
               ) : messages.length > 0 ? (
-                messages.map((message) => (
-                  <div key={message.id} className={`message-bubble ${message.sender}`}>
+                messages.map((msg) => (
+                  <div key={msg.id} className={`message-bubble ${msg.sender === 'me' ? 'user' : 'contact'}`}>
                     <div className="message-content">
-                      <div className="message-text">{message.text}</div>
-                      <div className={`timestamp-${message.sender === 'user' ? 'user' : 'contact'}`}>
-                        {message.time}
+                      <div className="message-text">{msg.text}</div>
+                      <div className={`timestamp-${msg.sender === 'me' ? 'user' : 'contact'}`}>
+                        {msg.time}
                       </div>
                     </div>
                   </div>
@@ -528,4 +649,4 @@ const sendMessage = async () => {
 
 };
 
-export default Chat;
+export default DoctorChat;

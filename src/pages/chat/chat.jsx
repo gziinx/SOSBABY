@@ -49,6 +49,10 @@ const Chat = () => {
       const text = msg?.conteudo || msg?.mensagem_enviada?.mensagem || '';
       const createdRaw = msg?.created_at || msg?.mensagem_enviada?.hora_envio;
       const idUser = msg?.id_user;
+      
+      // Obter ID do usuário atual para verificar se a mensagem é do usuário atual
+      const currentUserId = getUserId();
+      const isFromMe = idUser === currentUserId;
 
       let ts = '';
       if (createdRaw) {
@@ -68,7 +72,7 @@ const Chat = () => {
       const message = {
         id: Date.now().toString(),
         text,
-        sender: idUser == 1 ? 'me' : 'them',
+        sender: isFromMe ? 'me' : 'them',
         time: ts
       };
 
@@ -78,134 +82,247 @@ const Chat = () => {
         return updated;
       });
     },
-    [selectedContact]
+    
   );
+  const getUserId = () => {
+    try {
+      const userData = localStorage.getItem('user');
+      if (!userData) {
+        console.error('Dados do usuário não encontrados no localStorage');
+        return null;
+      }
+      const user = JSON.parse(userData);
+      return user.id_user || null;
+    } catch (error) {
+      console.error('Erro ao obter ID do usuário:', error);
+      return null;
+    }
+  };
+
 
   // Carregar mensagens do backend
-  const loadMessages = useCallback(async (chatId) => {
-    try {
-      const saved = localStorage.getItem(`chatMessages_${chatId}`);
-      if (saved) {
-        return JSON.parse(saved);
+ const loadMessages = useCallback(async (chatId) => {
+  try {
+    const currentUserId = getUserId();
+    if (!currentUserId) {
+      console.error('Usuário não autenticado');
+      return [];
+    }
+
+    const messages = await getChatMessages(chatId);
+    
+    // Verificar se há mensagens no localStorage
+    const savedMessages = localStorage.getItem(`chatMessages_${chatId}`);
+    let localMessages = [];
+    
+    if (savedMessages) {
+      try {
+        localMessages = JSON.parse(savedMessages);
+      } catch (e) {
+        console.error('Erro ao carregar mensagens locais:', e);
       }
+    }
 
-      const { success, data } = await getChatMessages(chatId);
-      if (!success) return [];
-
-      let items = Array.isArray(data) ? data : data?.chat_messages || [];
-
-      const formatted = items.map((msg) => {
-        const text = msg.conteudo || msg?.mensagem_enviada?.mensagem || '';
-        const createdRaw = msg.created_at || msg?.mensagem_enviada?.hora_envio;
-        const idUser = msg.id_user;
-
-        let ts = '';
-        if (createdRaw) {
-          const d = new Date(createdRaw);
-          ts = !isNaN(d.getTime())
-            ? d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
-            : '';
-        }
-
+    // Combinar mensagens do servidor com as locais
+    const allMessages = [...messages, ...localMessages]
+      // Remover duplicatas pelo ID da mensagem
+      .filter((msg, index, self) => 
+        index === self.findIndex(m => m.id === msg.id)
+      )
+      // Ordenar por data (mais antigas primeiro)
+      .sort((a, b) => {
+        const dateA = a.created_at ? new Date(a.created_at) : new Date();
+        const dateB = b.created_at ? new Date(b.created_at) : new Date();
+        return dateA - dateB;
+      })
+      // Mapear para o formato esperado pelo componente
+      .map(msg => {
+        const isFromMe = String(msg.id_user) === String(currentUserId);
         return {
-          id: msg.id_message || msg.id || String(Math.random()),
-          text,
-          sender: idUser == 1 ? 'me' : 'them',
-          time: ts
+          id: msg.id || Date.now().toString(),
+          text: msg.text || msg.conteudo || '',
+          sender: isFromMe ? 'me' : 'them',
+          time: msg.created_at 
+            ? new Date(msg.created_at).toLocaleTimeString('pt-BR', { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+              })
+            : new Date().toLocaleTimeString('pt-BR', { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+              }),
+          // Manter os dados originais para referência
+          original: msg
         };
       });
 
-      localStorage.setItem(`chatMessages_${chatId}`, JSON.stringify(formatted));
-      return formatted;
-    } catch (err) {
-      console.error(err);
-      return [];
-    }
-  }, []);
+    console.log('Mensagens carregadas e processadas:', allMessages);
+    return allMessages;
+
+  } catch (error) {
+    console.error('Erro ao carregar mensagens:', error);
+    return [];
+  }
+}, [getUserId]);
 
   // Criar novo chat caso não exista
   const createNewChat = async (contact) => {
     try {
-      const response = await createChat(contact.nome);
-      if (!response.success) return null;
+      const currentUserId = getUserId();
+      if (!currentUserId) {
+        console.error('Usuário não autenticado');
+        return null;
+      }
+      
+      const response = await createChat(currentUserId, contact.id);
+      if (!response.success) {
+        console.error('Falha ao criar chat:', response.error);
+        return null;
+      }
 
       const chatId = response.data?.id_chat || response.data?.id;
-      if (!chatId) return null;
+      if (!chatId) {
+        console.error('ID do chat inválido na resposta:', response.data);
+        return null;
+      }
 
       const map = { ...chatIdByContact, [contact.id]: String(chatId) };
-
       setChatIdByContact(map);
       localStorage.setItem('chatIdByContact', JSON.stringify(map));
 
       return chatId;
-    } catch {
+    } catch (error) {
+      console.error('Erro ao criar novo chat:', error);
       return null;
     }
   };
 
   // Selecionar contato
-  const selectContact = async (contact) => {
-    setLoading(true);
-    setError(null);
+ const selectContact = async (contact) => {
+  setLoading(true);
+  setError(null);
 
-    try {
-      let chatId = chatIdByContact[contact.id];
+  try {
+    const currentUserId = getUserId();
+    if (!currentUserId) {
+      setError('Usuário não autenticado');
+      setLoading(false);
+      return;
+    }
+
+    // Verificar se já existe um chat com este contato no localStorage
+    let chatId = chatIdByContact[contact.id];
+    let isNewChat = false;
+
+    // Se não encontrou um chat existente, tentar criar um novo
+    if (!chatId) {
+      const newChatResponse = await createChat(currentUserId, contact.id_user || contact.id);
+      
+      if (!newChatResponse?.success) {
+        setError(newChatResponse?.error || 'Falha ao criar ou encontrar chat');
+        setLoading(false);
+        return;
+      }
+      
+      // Usar o ID do chat retornado pela API
+      chatId = newChatResponse.data?.id_chat || newChatResponse.data?.id;
+      isNewChat = true;
+      
       if (!chatId) {
-        chatId = await createNewChat(contact);
-        if (!chatId) {
-          setError('Falha ao criar chat');
-          setLoading(false);
-          return;
-        }
+        setError('ID do chat inválido na resposta do servidor');
+        setLoading(false);
+        return;
       }
 
-      socketRef.current.emit('joinChat', chatId);
-      setSelectedContact({ ...contact, id: chatId });
-
-      const chatMessages = await loadMessages(chatId);
-      setMessages(chatMessages);
-    } catch (err) {
-      setError('Erro ao abrir chat');
-    } finally {
-      setLoading(false);
+      // Atualizar o mapeamento de contatos para IDs de chat
+      const updatedChatMap = {
+        ...chatIdByContact,
+        [contact.id]: String(chatId)
+      };
+      setChatIdByContact(updatedChatMap);
+      localStorage.setItem('chatIdByContact', JSON.stringify(updatedChatMap));
     }
-  };
 
+    // Conectar ao chat via socket
+    socketRef.current.emit('joinChat', chatId);
+    
+    // Atualizar o contato selecionado com o ID do chat
+    setSelectedContact({ 
+      ...contact, 
+      chatId: chatId,
+      originalId: contact.id
+    });
+
+    // Carregar as mensagens do chat
+    const chatMessages = await loadMessages(chatId);
+    setMessages(chatMessages);
+
+    // Adicionar à lista de conversas recentes se for um novo chat
+    if (isNewChat) {
+      const updatedConversations = [
+        {
+          id: contact.id,
+          nome: contact.nome_medico || contact.nome || 'Contato',
+          tipo: contact.tipo || 'Contato',
+          lastMessage: '',
+          lastMessageTime: new Date().toISOString()
+        },
+        ...recentConversations
+      ].slice(0, 10);
+      
+      setRecentConversations(updatedConversations);
+      localStorage.setItem('recentConversations', JSON.stringify(updatedConversations));
+    }
+  } catch (err) {
+    console.error('Erro ao abrir chat:', err);
+    setError('Erro ao abrir o chat. Tente novamente.');
+  } finally {
+    setLoading(false);
+  }
+};
+
+  // Obter ID do usuário logado
+  
   // Enviar mensagem
   const sendMessage = async () => {
     if (!newMessage.trim() || !selectedContact) return;
 
-    const msg = {
-      id: Date.now().toString(),
-      text: newMessage,
-      sender: 'me',
-      time: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
-    };
+    const userId = getUserId();
+    if (!userId) {
+      setError('Usuário não autenticado');
+      return;
+    }
 
-    const updated = [...messages, msg];
-    setMessages(updated);
-    localStorage.setItem(`chatMessages_${selectedContact.id}`, JSON.stringify(updated));
-
-    setNewMessage('');
+    const chatId = selectedContact.chatId || chatIdByContact[selectedContact.id];
+    if (!chatId) {
+      setError('ID do chat não encontrado');
+      return;
+    }
 
     try {
-      const response = await sendMessageService(selectedContact.id, {
-        conteudo: msg.text,
-        id_user: 1
-      });
+      // Criar o objeto da mensagem
+      const messageData = {
+        id_chat: parseInt(chatId),
+        conteudo: newMessage.trim(),
+        id_user: parseInt(userId),
+        created_at: new Date().toISOString()
+      };
+
+      // Enviar mensagem para o servidor
+      const response = await sendMessageService(chatId, messageData);
 
       if (!response.success) {
-        setError('Falha ao enviar mensagem');
-        return;
+        throw new Error(response.error || 'Falha ao enviar mensagem');
       }
 
-      socketRef.current.emit('SendMessage', {
-        id_chat: selectedContact.id,
-        conteudo: msg.text,
-        id_user: 1
-      });
+      // Enviar mensagem via socket
+      socketRef.current.emit('SendMessage', messageData);
+      
+      // Limpar o campo de mensagem
+      setNewMessage('');
     } catch (err) {
-      setError('Erro ao enviar mensagem');
+      console.error('Erro ao enviar mensagem:', err);
+      setError('Erro ao enviar mensagem. Tente novamente.');
     }
   };
 

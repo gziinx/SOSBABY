@@ -102,181 +102,197 @@ export const searchDoctors = async (searchTerm, token) => {
   }
 };
 
-export const createChat = async (chatName) => {
+export const createChat = async (user1_id, user2_id) => {
   try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      console.error('Token de autenticação não encontrado');
+      return {
+        success: false,
+        error: 'Usuário não autenticado'
+      };
+    }
+
+    console.log('Criando chat entre:', { user1_id, user2_id });
+
     const response = await fetch(`${API_BASE_URL}/chat/cadastro`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
       },
-      body: JSON.stringify({ nome_chat: chatName })
+      body: JSON.stringify({
+        user1_id: user1_id,
+        user2_id: user2_id
+      })
     });
 
-    const text = await response.text();
-console.log("RESPOSTA BRUTA DO BACKEND:", text);
-
-let data;
-try {
-  data = JSON.parse(text);
-} catch {
-  console.error("Backend devolveu HTML, não JSON.");
-  return {
-    success: false,
-    data: [],
-    error: "Backend retornou HTML — rota pode estar explodindo no servidor"
-  };
-}
+    const data = await response.json();
 
     if (!response.ok) {
-      console.error('Create chat error response:', data);
+      console.error('Erro ao criar chat:', data);
       return {
         success: false,
-        data: null,
         error: data.message || 'Falha ao criar chat'
       };
     }
 
+    console.log('Chat criado com sucesso:', data);
     return {
       success: true,
-      data: data.data || data,
-      error: null
+      data: data.data || data
     };
+
   } catch (error) {
-    console.error('Error creating chat:', error);
+    console.error('Erro ao criar chat:', error);
     return {
       success: false,
-      data: null,
-      error: error.message || 'Erro de rede'
+      error: error.message || 'Erro ao criar chat'
     };
   }
 };
 
 export const sendMessage = async (chatId, messageData) => {
   try {
-    // Step 1: Create the message
-    const messagePayload = {
-      id_chat: parseInt(chatId),
+    // Ensure we're sending the data in the correct format
+    const payload = {
       conteudo: messageData.conteudo,
-      id_user: messageData.id_user || 1
-    };
-
-    console.log('Sending message payload:', messagePayload);
-
-    const messageResponse = await fetch(`${API_BASE_URL}/message/send`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(messagePayload)
-    });
-
-    const messageData_response = await messageResponse.json();
-
-    if (!messageResponse.ok) {
-      console.error('Send message error response:', messageData_response);
-      return {
-        success: false,
-        data: null,
-        error: messageData_response.message || 'Falha ao enviar mensagem'
-      };
-    }
-
-    // Extract message ID from response
-    const messageId = messageData_response.data?.id_mensagem || messageData_response.data?.id;
-    
-    if (!messageId) {
-      console.error('No message ID in response:', messageData_response);
-      return {
-        success: false,
-        data: null,
-        error: 'Falha ao obter ID da mensagem'
-      };
-    }
-
-    // Step 2: Create the chat-message relationship
-    const chatMessagePayload = {
       id_chat: parseInt(chatId),
-      id_mensagem: parseInt(messageId)
+      id_user: parseInt(messageData.id_user)
     };
 
-    console.log('Creating chat-message relationship:', chatMessagePayload);
+    console.log('Sending message payload:', payload);
 
-    const chatMessageResponse = await fetch(`${API_BASE_URL}/chat/message/cadastro`, {
+    const response = await fetch(`${API_BASE_URL}/message/send`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
       },
-      body: JSON.stringify(chatMessagePayload)
+      body: JSON.stringify(payload)
     });
 
-    const chatMessageData = await chatMessageResponse.json();
+    const responseData = await response.json();
 
-    if (!chatMessageResponse.ok) {
-      console.error('Chat-message relationship error response:', chatMessageData);
+    if (!response.ok) {
+      console.error('Send message error response:', responseData);
       return {
         success: false,
-        data: null,
-        error: chatMessageData.message || 'Falha ao criar relacionamento da mensagem'
+        error: responseData.message || 'Falha ao enviar mensagem'
       };
     }
 
     return {
       success: true,
-      data: chatMessageData.data || chatMessageData,
-      error: null
+      data: responseData
     };
   } catch (error) {
     console.error('Error sending message:', error);
     return {
       success: false,
-      data: null,
-      error: error.message || 'Erro de rede'
+      error: 'Erro de conexão ao enviar mensagem'
     };
   }
 };
 
 export const getChatMessages = async (chatId) => {
   try {
-    // Try primary endpoint first
-    const response = await fetch(`${API_BASE_URL}/chat/message/${chatId}`)
+    const token = localStorage.getItem('token');
+    if (!token) {
+      console.error('Token de autenticação não encontrado');
+      return [];
+    }
+
+    console.log('Buscando mensagens para o chat ID:', chatId);
+    const response = await fetch(`${API_BASE_URL}/chat/message/${chatId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      }
+    });
 
     const data = await response.json();
 
-    if (response.ok) {
-      return {
-        success: true,
-        data: data.data || data || [],
-        error: null
-      };
+    if (!response.ok) {
+      console.error('Erro ao buscar mensagens:', data);
+      return [];
     }
 
-    // If primary endpoint fails, try alternative endpoint
-    console.log('Primary endpoint failed, trying alternative /chatMessages endpoint');
-    const alternativeResponse = await fetch(`${API_BASE_URL}/chat/message/${chatId}`);
-    const alternativeData = await alternativeResponse.json();
-
-    if (alternativeResponse.ok) {
-      console.log('Alternative endpoint succeeded');
-      return {
-        success: true,
-        data: alternativeData.data || alternativeData || [],
-        error: null
-      };
+    // Verificar se a resposta tem a estrutura esperada
+    if (!data.mensagens || !Array.isArray(data.mensagens)) {
+      console.error('Formato de mensagens inválido:', data);
+      return [];
     }
 
-    // If both fail, return error
-    console.error('Both endpoints failed. Primary:', data, 'Alternative:', alternativeData);
+    console.log('Mensagens recebidas:', data.mensagens);
+    return data.mensagens.map(msg => ({
+      id: msg.id_mensagem,
+      text: msg.conteudo,
+      sender: 'them', // Será ajustado no componente se for do usuário atual
+      time: msg.created_at,
+      id_user: msg.id_user,
+      nome_user: msg.nome_user
+    }));
+
+  } catch (error) {
+    console.error('Erro ao buscar mensagens:', error);
+    return [];
+  }
+};
+
+// In chatService.js
+export const getAllChats = async () => {
+  try {
+    const token = localStorage.getItem('token');
+    const response = await fetch(`${API_URL}/chats`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    const data = await response.json();
     return {
-      success: false,
-      data: [],
-      error: data.message || alternativeData.message || 'Falha ao buscar mensagens'
+      success: true,
+      data: data,
+      error: null
     };
   } catch (error) {
-    console.error('Error fetching messages:', error);
+    console.error('Error fetching chats:', error);
     return {
       success: false,
-      data: [],
-      error: error.message || 'Erro de rede'
+      data: null,
+      error: error.message
     };
+  }
+};
+export const checkExistingChat = async (user1Id, user2Id) => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      return { success: false, error: 'Usuário não autenticado' };
+    }
+
+    const response = await fetch(`${API_BASE_URL}/chat/check`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        user1_id: user1Id,
+        user2_id: user2Id
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      return { success: false, error: data.message || 'Falha ao verificar chat existente' };
+    }
+
+    return { success: true, data };
+  } catch (error) {
+    console.error('Erro ao verificar chat existente:', error);
+    return { success: false, error: 'Erro de conexão' };
   }
 };
