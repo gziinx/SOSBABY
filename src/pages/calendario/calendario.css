@@ -264,22 +264,215 @@ header{
 
 .card-branco {
   background-color: #fff;
-  border-radius: 20px;
-  margin-bottom: 15px;
-  padding: 10px 15px;
+  border-radius: 15px;
+  margin-bottom: 12px;
+  transition: all 0.3s ease;
+  padding: 15px 15px 15px 45px; /* Mais espaço à esquerda para o círculo */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid #f0f0f0;
+  position: relative;
+  padding-right: 80px; /* Espaço para os botões */
+}
+
+.card-branco[data-expanded="true"] {
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  margin: 12px 0;
+}
+
+.card-branco h3 {
+  font-size: 14px;
+  color: #2c3e50;
+  margin: 0;
+  font-weight: 600;
+  flex: 1;
+}
+
+.cabecalho-evento {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 5px;
+  gap: 10px;
+  padding-right: 40px; /* Espaço para a seta */
+  position: relative;
+  min-height: 24px; /* Altura mínima para garantir espaço */
+}
+
+.hora-evento {
+  font-size: 13px;
+  color: #708EF1;
+  font-weight: 600;
+  background: rgba(112, 142, 241, 0.1);
+  padding: 3px 10px;
+  border-radius: 12px;
+  white-space: nowrap; /* Impede que o horário quebre em várias linhas */
+  flex-shrink: 0; /* Impede que o horário diminua */
+}
+
+.data-evento {
+  font-size: 12px;
+  color: #7f8c8d;
+  margin-bottom: 8px;
+}
+
+.acoes-evento {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  gap: 8px;
+  position: absolute;
+  right: 15px;
+  top: 15px;
+  background: #fff;
+  padding-left: 10px;
+  border-radius: 20px;
+  box-shadow: -5px 0 10px rgba(255, 255, 255, 0.9);
+}
+
+.btn-expandir {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #95a5a6;
+  transition: all 0.2s;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+}
+
+.btn-expandir:hover {
+  background: #f5f6fa;
+  color: #708EF1;
+}
+
+.seta-icone {
+  transition: transform 0.3s ease;
+}
+
+.detalhes-expandidos {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #f0f0f0;
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.info-item {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+
+.info-rotulo {
+  font-size: 12px;
+  color: #708EF1;
+  min-width: 90px;
+  font-weight: 600;
+  margin-right: 10px;
+  display: inline-block;
+}
+
+.info-valor {
+  font-size: 13px;
+  color: #2c3e50;
+  flex: 1;
+}
+
+.info-nota {
+  background: #f0f4ff;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #2c3e50;
+  margin: 8px 0 0 0;
+  border-right: 3px solid #708EF1;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.cor-evento {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  border: 1px solid #eee;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.lixo {
+  margin-left: 5px;
+  padding: 5px;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.lixo:hover {
+  background: #f8f9fa;
+}
+
+.lixo img {
+  width: 20px;
+  height: 20px;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.lixo:hover img {
+  opacity: 1;
+}
+
+.conteudo {
+  flex: 1;
+  min-width: 0; /* Permite que o conteúdo quebre corretamente */
+}
+
+.nota-expandida {
+  padding: 12px 0;
+  margin-top: 8px;
+  border-top: 1px solid #f0f0f0;
+  animation: fadeIn 0.3s ease;
+}
+
+.nota-expandida p {
+  font-size: 12px !important;
+  color: #333 !important;
+  line-height: 1.5;
+  margin: 0;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.card-branco:focus {
+  outline: 2px solid #4a64f5;
+  outline-offset: 2px;
 }
 
 .circulo {
-  width: 20px;
-  height: 20px;
+  position: absolute;
+  left: 15px;
+  top: 18px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
   background-color: #FFA63D;
-  border: solid 1px #000;
+  border: solid 1px rgba(0,0,0,0.1);
 }
 
 .laranja {
@@ -296,16 +489,6 @@ header{
 
 .conteudo {
   flex: 1;
-}
-
-.card-branco h3 {
-  font-size: 13px;
-  color: #000;
-}
-
-.card-branco p {
-  font-size: 11px;
-  color: #555;
 }
 
 .lixo img {
@@ -333,6 +516,131 @@ header{
 
 .botao-mais:hover {
   transform: scale(1.1);
+}
+
+/* --- MODAL DE DETALHES DO EVENTO --- */
+.evento-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 50px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.evento-modal.show {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.evento-modal .modal-conteudo {
+  background: white;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  transform: translateY(-50px);
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  position: relative;
+  z-index: 2;
+  overflow: hidden;
+}
+
+.evento-modal.show .modal-conteudo {
+  transform: translateY(0);
+}
+
+.modal-cabecalho {
+  padding: 20px;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+}
+
+.modal-cabecalho h3 {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: white;
+}
+
+.fechar-modal {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 28px;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0 5px;
+  transition: transform 0.2s;
+}
+
+.fechar-modal:hover {
+  transform: rotate(90deg);
+}
+
+.modal-corpo {
+  padding: 20px;
+}
+
+.info-item {
+  margin-bottom: 15px;
+  display: flex;
+  align-items: flex-start;
+}
+
+.info-rotulo {
+  font-weight: 600;
+  color: #555;
+  min-width: 80px;
+  display: inline-block;
+}
+
+.info-valor {
+  color: #333;
+  flex: 1;
+}
+
+.info-nota {
+  background: #f8f9fa;
+  padding: 12px;
+  border-radius: 8px;
+  margin-top: 5px;
+  color: #333;
+  line-height: 1.5;
+}
+
+.cor-evento {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid #eee;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.evento-modal.show .modal-overlay {
+  opacity: 1;
 }
 
 /* --- MODAL --- */

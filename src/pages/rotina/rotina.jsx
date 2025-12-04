@@ -39,16 +39,11 @@ const Rotina = () => {
     hora: '',
     data_rotina: ''
   });
-  const [apiStatus, setApiStatus] = useState('loading'); // 'loading', 'error', 'success'
+  const [apiStatus, setApiStatus] = useState('loading'); 
 
-  // Função para obter o token JWT
+  
   const getAuthToken = () => {
-    // PROBLEMA IDENTIFICADO: Token atual é do usuário ID 2 com id_tipo: 3
-    // que não tem permissão para criar rotinas ("Acesso negado para esse tipo de usuário")
-    // 
-    // localStorage tem usuário ID 1 com id_tipo: 1 que pode ter permissão
-    // 
-    // Token atual (ID 2, tipo 3): SEM PERMISSÃO
+   
     const stored = (
       localStorage.getItem('token') ||
       localStorage.getItem('authToken') ||
@@ -60,8 +55,7 @@ const Rotina = () => {
     if (stored) return stored;
     return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c2VyIjoyLCJpZF90aXBvIjozLCJpYXQiOjE3NjI4OTAzNzQsImV4cCI6MTc2MzQ5NTE3NH0.RsSDDYbnqaEbrgjet0nhuwbBEN3Urq5kdzaSm8dDPEM';
     
-    // TODO: Precisa de um token para o usuário ID 1 com id_tipo: 1
-    // ou verificar se o usuário ID 2 pode ter permissões ajustadas na API
+
   };
 
   // Função para criar headers com autenticação

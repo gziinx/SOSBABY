@@ -360,16 +360,21 @@ section {
     display: block;
     margin: 2rem auto 0;
     padding: 0.75rem 2rem;
-    background: #2563EB;
+    background: #708EF1;
     color: #fff;
     border: none;
     border-radius: 9999px;
     cursor: pointer;
     transition: 0.3s;
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
 }
 
 .btn:hover {
-    background: #1E40AF;
+    background: #5a7cee;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(112, 142, 241, 0.3);
 }
 
 /* Daily Routine */
@@ -413,6 +418,12 @@ section {
   position: relative;
   border: none;
   width: 100%;
+}
+
+.routine-section h2::before,
+.routine-section h2::after {
+  content: none !important;
+  display: none !important;
 }
 
 .routine {
@@ -1061,20 +1072,20 @@ footer .brand {
 }
 
 .btn {
-  background: linear-gradient(135deg, #4a6ef5 0%, #8a63f2 100%);
+  background: #708EF1;
   color: white;
   border: none;
   padding: 0.8rem 2rem;
   border-radius: 50px;
-  cursor: pointer;
   font-weight: 600;
-  font-size: 0.95rem;
+  font-size: 1rem;
+  cursor: pointer;
   transition: all 0.3s ease;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  box-shadow: 0 4px 15px rgba(74, 110, 245, 0.3);
+  box-shadow: 0 4px 15px rgba(112, 142, 241, 0.3);
   position: relative;
   overflow: hidden;
   z-index: 1;
@@ -1095,7 +1106,8 @@ footer .brand {
 
 .btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(74, 110, 245, 0.4);
+  box-shadow: 0 6px 20px rgba(112, 142, 241, 0.4);
+  background: #5a7cee;
 }
 
 .btn:hover::before {

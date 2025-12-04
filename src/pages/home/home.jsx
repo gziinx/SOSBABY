@@ -419,6 +419,29 @@ export default function Home() {
               </div>
 
               <div className="days" id="days"></div>
+              
+              {/* Botão Ver Calendário Completo */}
+              <div className="calendar-actions" style={{ marginTop: '3rem', textAlign: 'center' }}>
+                <button 
+                  className="btn" 
+                  onClick={() => navigate('/calendario')}
+                  style={{
+                    display: 'inline-block',
+                    padding: '0.75rem 2rem',
+                    background: '#708EF1',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: '9999px',
+                    cursor: 'pointer',
+                    transition: '0.3s',
+                    fontSize: '1rem',
+                    fontWeight: '600',
+                    margin: '1rem 0 0 0'
+                  }}
+                >
+                  Ver Calendário Completo
+                </button>
+              </div>
             </div>
 
             <div className="linha"></div>
@@ -461,7 +484,9 @@ export default function Home() {
                       </div>
                     );
                   })}
-                  <button className="btn" onClick={() => navigate('/rotina')}>Ver rotina completa</button>
+                  <div className="routine-actions" style={{ marginTop: '3rem', textAlign: 'center' }}>
+                    <button className="btn" onClick={() => navigate('/rotina')}>Ver rotina completa</button>
+                  </div>
                 </div>
               </div>
             ) : (

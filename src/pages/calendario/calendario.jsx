@@ -132,6 +132,88 @@ export default function Calendarioo() {
       }, 1500);
     }
 
+    // Função para criar e exibir o modal de detalhes do evento
+    function mostrarDetalhesEvento(evento) {
+      // Remove o modal existente se houver
+      const modalExistente = document.getElementById('evento-modal');
+      if (modalExistente) {
+        document.body.removeChild(modalExistente);
+      }
+
+      // Cria o modal
+      const modal = document.createElement('div');
+      modal.id = 'evento-modal';
+      modal.className = 'evento-modal';
+      
+      // Formata a data e hora
+      const dataFormatada = formatarData(evento.data_calendario + 'T00:00:00Z');
+      const horaFormatada = formatarHora(evento.hora_calendario);
+      
+      // Conteúdo do modal
+      modal.innerHTML = `
+        <div class="modal-conteudo">
+          <div class="modal-cabecalho" style="background-color: ${evento.cor || '#708EF1'};">
+            <h3>${evento.titulo || 'Sem título'}</h3>
+            <button class="fechar-modal">&times;</button>
+          </div>
+          <div class="modal-corpo">
+            <div class="info-item">
+              <span class="info-rotulo">Data:</span>
+              <span class="info-valor">${dataFormatada}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-rotulo">Hora:</span>
+              <span class="info-valor">${horaFormatada}</span>
+            </div>
+            ${evento.nota ? `
+            <div class="info-item">
+              <span class="info-rotulo">Nota:</span>
+              <p class="info-nota">${evento.nota}</p>
+            </div>` : ''}
+            <div class="info-item">
+              <span class="info-rotulo">Cor:</span>
+              <div class="cor-evento" style="background-color: ${evento.cor || '#708EF1'}"></div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-overlay"></div>
+      `;
+
+      // Adiciona o modal ao body
+      document.body.appendChild(modal);
+      document.body.style.overflow = 'hidden'; // Impede rolagem do body
+
+      // Adiciona a classe para ativar a animação
+      setTimeout(() => {
+        modal.classList.add('show');
+      }, 10);
+
+      // Fecha o modal ao clicar no botão de fechar ou no overlay
+      const btnFechar = modal.querySelector('.fechar-modal');
+      const overlay = modal.querySelector('.modal-overlay');
+      
+      const fecharModal = () => {
+        modal.classList.remove('show');
+        setTimeout(() => {
+          if (modal.parentNode) {
+            document.body.removeChild(modal);
+            document.body.style.overflow = '';
+          }
+        }, 300); // Tempo da animação de saída
+      };
+
+      btnFechar.addEventListener('click', fecharModal);
+      overlay.addEventListener('click', fecharModal);
+
+      // Fecha com a tecla ESC
+      document.addEventListener('keydown', function fecharComEsc(e) {
+        if (e.key === 'Escape') {
+          fecharModal();
+          document.removeEventListener('keydown', fecharComEsc);
+        }
+      });
+    }
+
     function exibirEventosNoCardAzul(eventos, dataSelecionada) {
       const container = document.getElementById('eventos-hoje');
       if (!container) return;
@@ -160,20 +242,79 @@ export default function Calendarioo() {
       eventos.forEach(ev => {
         const card = document.createElement('div');
         card.classList.add('card-branco');
+        card.setAttribute('data-expanded', 'false');
+
+        // Formata os dados para exibição
+        const dataFormatada = formatarData(ev.data_calendario);
+        const horaFormatada = formatarHora(ev.hora_calendario);
+        const corEvento = ev.cor || '#708EF1';
+        const temAlarme = ev.alarme === 'true' || ev.alarme === true;
 
         card.innerHTML = `
-          <div class="circulo" style="background-color: ${ev.cor || '#708EF1'}"></div>
+          <div class="circulo" style="background-color: ${corEvento}"></div>
           <div class="conteudo">
-              <h3>${ev.titulo}</h3>
-              <p>${formatarData(ev.data_calendario)} - ${formatarHora(ev.hora_calendario)}</p>
+              <div class="cabecalho-evento">
+                <h3>${ev.titulo || 'Sem título'}</h3>
+                <div class="hora-evento">${horaFormatada}</div>
+              </div>
+              <div class="data-evento">${dataFormatada}</div>
+              <div class="detalhes-expandidos" style="display: none;">
+                <div class="info-item">
+                  <span class="info-rotulo">Cor:</span>
+                  <div class="cor-evento" style="background-color: ${corEvento}"></div>
+                </div>
+                <div class="info-item">
+                  <span class="info-rotulo">Descrição:</span>
+                  <p class="info-nota">${ev.descricao || 'Nenhuma descrição fornecida'}</p>
+                </div>
+                <div class="info-item">
+                  <span class="info-rotulo">Alarme:</span>
+                  <span class="info-valor">${temAlarme ? 'Ativado' : 'Desativado'}</span>
+                </div>
+              </div>
           </div>
-          <div class="lixo" data-id="${ev.id_calendario}">
+          <div class="acoes-evento">
+            <button class="btn-expandir" aria-label="Mostrar detalhes">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="seta-icone">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </button>
+            <div class="lixo" data-id="${ev.id_calendario}" aria-label="Excluir evento">
               <img src="${trashIcon}" alt="Excluir">
+            </div>
           </div>`;
 
         container.appendChild(card);
 
-        card.querySelector('.lixo')?.addEventListener('click', async (e) => {
+        // Adiciona evento de clique no botão de expandir/recolher
+        const btnExpandir = card.querySelector('.btn-expandir');
+        const detalhesExpandidos = card.querySelector('.detalhes-expandidos');
+        const setaIcone = card.querySelector('.seta-icone');
+        
+        if (btnExpandir && detalhesExpandidos) {
+          btnExpandir.addEventListener('click', (e) => {
+            e.stopPropagation(); // Impede que o clique se propague para o card
+            const isExpanded = card.getAttribute('data-expanded') === 'true';
+            
+            // Alterna entre mostrar e esconder os detalhes
+            if (isExpanded) {
+              detalhesExpandidos.style.display = 'none';
+              setaIcone.style.transform = 'rotate(0deg)';
+              card.setAttribute('data-expanded', 'false');
+            } else {
+              detalhesExpandidos.style.display = 'block';
+              setaIcone.style.transform = 'rotate(180deg)';
+              card.setAttribute('data-expanded', 'true');
+              
+              // Rola suavemente até o card se necessário
+              card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+          });
+        }
+
+        // Adiciona evento de clique na lixeira
+        const lixo = card.querySelector('.lixo');
+        lixo?.addEventListener('click', async (e) => {
           const id = e.currentTarget.dataset.id;
           if (confirm('Deseja realmente excluir este evento?')) {
             try {
@@ -343,7 +484,13 @@ export default function Calendarioo() {
       selectAno.value = new Date().getFullYear();
     }
 
-    botaoMais?.addEventListener('click', () => modal && (modal.style.display = 'flex'));
+    botaoMais?.addEventListener('click', () => {
+      if (modal) {
+        // Limpa os campos ao abrir o modal
+        limparCamposFormulario();
+        modal.style.display = 'flex';
+      }
+    });
     window.addEventListener('click', (e) => { if (e.target === modal) modal.style.display = 'none'; });
 
     adicionarCor?.addEventListener('click', () => colorModal && (colorModal.style.display = 'flex'));
@@ -375,6 +522,32 @@ export default function Calendarioo() {
 
     const salvarBtn = document.getElementById('salvar');
     let isSaving = false;
+    // Função para limpar os campos do formulário
+    function limparCamposFormulario() {
+      const horaInput = document.querySelector('.hora-input');
+      const tituloInput = document.querySelector('input[placeholder="Escreva o título"]');
+      const descricaoInput = document.querySelector('textarea');
+      const toggleAlarme = document.getElementById('toggle');
+      
+      if (horaInput) horaInput.value = '';
+      if (tituloInput) tituloInput.value = '';
+      if (descricaoInput) descricaoInput.value = '';
+      if (toggleAlarme) toggleAlarme.checked = false;
+      
+      // Define a data atual como padrão
+      const hoje = new Date();
+      if (selectDia) selectDia.value = String(hoje.getDate()).padStart(2, '0');
+      if (selectMes) selectMes.value = String(hoje.getMonth() + 1).padStart(2, '0');
+      if (selectAno) selectAno.value = hoje.getFullYear();
+      
+      // Mantém a primeira cor selecionada
+      const primeiraCor = document.querySelector('.cor:not(.mais)');
+      if (primeiraCor) {
+        document.querySelectorAll('.cor').forEach(c => c.classList.remove('selecionada'));
+        primeiraCor.classList.add('selecionada');
+      }
+    }
+
     if (salvarBtn) salvarBtn.onclick = async () => {
       if (isSaving) return;
       const horaInput = document.querySelector('.hora-input');
@@ -431,6 +604,10 @@ export default function Calendarioo() {
 
         if (response.ok) {
           setTimeout(() => { salvarBtn.textContent = 'Salvo!'; }, 100);
+          // Limpa os campos do formulário
+          limparCamposFormulario();
+          
+          // Fecha o modal e atualiza a interface
           if (modal) modal.style.display = 'none';
           await buscarEventos();
           renderCalendar();

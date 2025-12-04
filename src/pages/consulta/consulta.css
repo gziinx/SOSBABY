@@ -69,25 +69,26 @@
 }
 
 .consultation-button {
-  background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
-  color: white;
-  border: none;
-  padding: 15px 40px;
-  border-radius: 50px;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  width: 100%;
-  max-width: 200px;
+  background: #708EF1 !important;
+  color: white !important;
+  border: none !important;
+  padding: 15px 40px !important;
+  border-radius: 50px !important;
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 4px 15px rgba(112, 142, 241, 0.3) !important;
+  text-transform: uppercase !important;
+  letter-spacing: 1px !important;
+  width: 100% !important;
+  max-width: 200px !important;
 }
 
 .consultation-button:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(79, 172, 254, 0.4);
+  box-shadow: 0 6px 20px rgba(112, 142, 241, 0.4);
+  background: #5a7cee;
 }
 
 .consultation-button:active {
