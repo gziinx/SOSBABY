@@ -101,69 +101,46 @@ const Chat = () => {
 
 
   // Carregar mensagens do backend
- const loadMessages = useCallback(async (chatId) => {
+const loadMessages = async (chatId) => {
+  if (!chatId) {
+    console.error('ID do chat não fornecido');
+    return [];
+  }
+
   try {
-    const currentUserId = getUserId();
-    if (!currentUserId) {
-      console.error('Usuário não autenticado');
+    console.log(`Carregando mensagens para o chat: ${chatId}`);
+    const messages = await getChatMessages(chatId);
+    console.log('Mensagens recebidas:', messages);
+    
+    if (!Array.isArray(messages)) {
+      console.warn('Formato de mensagens inesperado:', messages);
       return [];
     }
 
-    const messages = await getChatMessages(chatId);
-    
-    // Verificar se há mensagens no localStorage
-    const savedMessages = localStorage.getItem(`chatMessages_${chatId}`);
-    let localMessages = [];
-    
-    if (savedMessages) {
-      try {
-        localMessages = JSON.parse(savedMessages);
-      } catch (e) {
-        console.error('Erro ao carregar mensagens locais:', e);
-      }
-    }
-
-    // Combinar mensagens do servidor com as locais
-    const allMessages = [...messages, ...localMessages]
-      // Remover duplicatas pelo ID da mensagem
-      .filter((msg, index, self) => 
-        index === self.findIndex(m => m.id === msg.id)
-      )
-      // Ordenar por data (mais antigas primeiro)
-      .sort((a, b) => {
-        const dateA = a.created_at ? new Date(a.created_at) : new Date();
-        const dateB = b.created_at ? new Date(b.created_at) : new Date();
-        return dateA - dateB;
-      })
-      // Mapear para o formato esperado pelo componente
-      .map(msg => {
-        const isFromMe = String(msg.id_user) === String(currentUserId);
-        return {
-          id: msg.id || Date.now().toString(),
-          text: msg.text || msg.conteudo || '',
-          sender: isFromMe ? 'me' : 'them',
-          time: msg.created_at 
-            ? new Date(msg.created_at).toLocaleTimeString('pt-BR', { 
-                hour: '2-digit', 
-                minute: '2-digit' 
-              })
-            : new Date().toLocaleTimeString('pt-BR', { 
-                hour: '2-digit', 
-                minute: '2-digit' 
-              }),
-          // Manter os dados originais para referência
-          original: msg
-        };
-      });
-
-    console.log('Mensagens carregadas e processadas:', allMessages);
-    return allMessages;
+    return messages.map(msg => {
+      // Ensure we have a valid message object
+      if (!msg) return null;
+      
+      return {
+        id: msg.id_mensagem || msg.id || `temp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        text: msg.conteudo || msg.text || '',
+        sender: String(msg.id_user) === String(getUserId()) ? 'me' : 'them',
+        time: msg.created_at ? 
+          new Date(msg.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : 
+          new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+      };
+    }).filter(Boolean); // Remove any null/undefined messages
 
   } catch (error) {
-    console.error('Erro ao carregar mensagens:', error);
+    console.error('Erro ao carregar mensagens:', {
+      error: error.message,
+      stack: error.stack,
+      chatId
+    });
+    setError('Não foi possível carregar as mensagens. Tente novamente.');
     return [];
   }
-}, [getUserId]);
+};
 
   // Criar novo chat caso não exista
   const createNewChat = async (contact) => {
@@ -198,7 +175,7 @@ const Chat = () => {
   };
 
   // Selecionar contato
- const selectContact = async (contact) => {
+const selectContact = async (contact) => {
   setLoading(true);
   setError(null);
 
@@ -210,31 +187,34 @@ const Chat = () => {
       return;
     }
 
-    // Verificar se já existe um chat com este contato no localStorage
-    let chatId = chatIdByContact[contact.id];
-    let isNewChat = false;
+    // Set the selected contact immediately to show the chat area
+    setSelectedContact(contact);
 
-    // Se não encontrou um chat existente, tentar criar um novo
+    // Check if we already have a chat ID for this contact
+    let chatId = chatIdByContact[contact.id];
+
+    // If no chat exists, create a new one
     if (!chatId) {
-      const newChatResponse = await createChat(currentUserId, contact.id_user || contact.id);
+      console.log('Criando novo chat entre:', { user1_id: currentUserId, user2_id: contact.id_user || contact.id });
       
-      if (!newChatResponse?.success) {
-        setError(newChatResponse?.error || 'Falha ao criar ou encontrar chat');
-        setLoading(false);
-        return;
+      const response = await createChat(currentUserId, contact.id_user || contact.id);
+      console.log('Resposta da criação do chat:', response);
+      
+      if (!response?.success) {
+        throw new Error(response?.error || 'Falha ao criar chat');
       }
+
+      // Extract chat ID from the response
+      chatId = response.data?.chat?.id_chat || response.data?.id_chat || response.data?.id;
       
-      // Usar o ID do chat retornado pela API
-      chatId = newChatResponse.data?.id_chat || newChatResponse.data?.id;
-      isNewChat = true;
+      console.log('ID do chat extraído:', chatId);
       
       if (!chatId) {
-        setError('ID do chat inválido na resposta do servidor');
-        setLoading(false);
-        return;
+        console.error('Estrutura inesperada da resposta:', response);
+        throw new Error('ID do chat não encontrado na resposta');
       }
 
-      // Atualizar o mapeamento de contatos para IDs de chat
+      // Update the chat ID mapping
       const updatedChatMap = {
         ...chatIdByContact,
         [contact.id]: String(chatId)
@@ -243,39 +223,27 @@ const Chat = () => {
       localStorage.setItem('chatIdByContact', JSON.stringify(updatedChatMap));
     }
 
-    // Conectar ao chat via socket
+    // Connect to the chat
+    console.log('Conectando ao chat:', chatId);
     socketRef.current.emit('joinChat', chatId);
-    
-    // Atualizar o contato selecionado com o ID do chat
-    setSelectedContact({ 
-      ...contact, 
-      chatId: chatId,
-      originalId: contact.id
-    });
 
-    // Carregar as mensagens do chat
-    const chatMessages = await loadMessages(chatId);
-    setMessages(chatMessages);
+    // Update the selected contact with the chat ID
+    const updatedContact = {
+      ...contact,
+      chatId: String(chatId)
+    };
+    setSelectedContact(updatedContact);
 
-    // Adicionar à lista de conversas recentes se for um novo chat
-    if (isNewChat) {
-      const updatedConversations = [
-        {
-          id: contact.id,
-          nome: contact.nome_medico || contact.nome || 'Contato',
-          tipo: contact.tipo || 'Contato',
-          lastMessage: '',
-          lastMessageTime: new Date().toISOString()
-        },
-        ...recentConversations
-      ].slice(0, 10);
-      
-      setRecentConversations(updatedConversations);
-      localStorage.setItem('recentConversations', JSON.stringify(updatedConversations));
-    }
+    // Load messages
+    console.log('Carregando mensagens para o chat:', chatId);
+    const messages = await loadMessages(chatId);
+    console.log('Mensagens carregadas:', messages);
+    setMessages(messages || []);
+
   } catch (err) {
-    console.error('Erro ao abrir chat:', err);
-    setError('Erro ao abrir o chat. Tente novamente.');
+    console.error('Erro ao selecionar contato:', err);
+    setError(err.message || 'Erro ao abrir o chat. Tente novamente.');
+    setSelectedContact(null);
   } finally {
     setLoading(false);
   }

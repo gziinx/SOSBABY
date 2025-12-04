@@ -241,7 +241,6 @@ export const getChatMessages = async (chatId) => {
   }
 };
 
-// In chatService.js
 export const getAllChats = async () => {
   try {
     const token = localStorage.getItem('token');
@@ -263,36 +262,5 @@ export const getAllChats = async () => {
       data: null,
       error: error.message
     };
-  }
-};
-export const checkExistingChat = async (user1Id, user2Id) => {
-  try {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      return { success: false, error: 'Usuário não autenticado' };
-    }
-
-    const response = await fetch(`${API_BASE_URL}/chat/check`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify({
-        user1_id: user1Id,
-        user2_id: user2Id
-      })
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      return { success: false, error: data.message || 'Falha ao verificar chat existente' };
-    }
-
-    return { success: true, data };
-  } catch (error) {
-    console.error('Erro ao verificar chat existente:', error);
-    return { success: false, error: 'Erro de conexão' };
   }
 };

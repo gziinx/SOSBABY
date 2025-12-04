@@ -369,15 +369,15 @@ export default function Home() {
               <div className="service-icon">
                 <img src={botIcon} alt="Bot" style={{ width: '60px', height: '60px' }} />
               </div>
-              <h3>AI</h3>
-              <p>Somos uma time que auxilia pais de primeira viagem e pai mais solo.</p>
+              <h3>IA</h3>
+              <p>Realize pesquisas e receba respostas imediatas pela IA</p>
             </div>
             <div className="service" onClick={handleChat} style={{ cursor: 'pointer' }}>
               <div className="service-icon">
                 <img src={chatIcon} alt="Chat" style={{ width: '60px', height: '60px' }} />
               </div>
               <h3>Chat com médico</h3>
-              <p>Funcionalidade com uma plataforma aferideelat</p>
+              <p>Converse em tempo real com médicos especializados</p>
             </div>
             <div className="service" onClick={handleRotina} style={{ cursor: 'pointer' }}>
               <div className="service-icon">

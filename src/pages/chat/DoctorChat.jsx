@@ -42,48 +42,59 @@ const DoctorChat = () => {
   }, []);
 
   // Receber mensagem via socket
-  const handleIncomingMessage = useCallback(
-    (msg) => {
-      if (!selectedContact) return;
+ const handleIncomingMessage = useCallback((msg) => {
+  if (!selectedContact) return;
 
-      const text = msg?.conteudo || msg?.mensagem_enviada?.mensagem || '';
-      const createdRaw = msg?.created_at || msg?.mensagem_enviada?.hora_envio;
-      const idUser = msg?.id_user;
-      
-      // Obter ID do usuário atual para verificar se a mensagem é do usuário atual
-      const currentUserId = getUserId();
-      const isFromMe = idUser === currentUserId;
+  // Skip if this is our own message that we already added optimistically
+  if (msg.isTemp !== undefined && msg.id_user === getUserId()) {
+    return;
+  }
 
-      let ts = '';
-      if (createdRaw) {
-        const d = new Date(createdRaw);
-        ts = !isNaN(d.getTime())
-          ? d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
-          : '';
-      }
+  const text = msg?.conteudo || msg?.mensagem_enviada?.mensagem || '';
+  const createdRaw = msg?.created_at || msg?.mensagem_enviada?.hora_envio;
+  const idUser = msg?.id_user;
+  
+  // Get current user ID to check if the message is from the current user
+  const currentUserId = getUserId();
+  const isFromMe = idUser == currentUserId; // Use loose equality to handle string/number comparison
 
-      if (!ts) {
-        ts = new Date().toLocaleTimeString('pt-BR', {
-          hour: '2-digit',
-          minute: '2-digit'
-        });
-      }
+  let ts = '';
+  if (createdRaw) {
+    const d = new Date(createdRaw);
+    ts = !isNaN(d.getTime())
+      ? d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+      : '';
+  }
 
-      const message = {
-        id: Date.now().toString(),
-        text,
-        sender: isFromMe ? 'me' : 'them',
-        time: ts
-      };
+  if (!ts) {
+    ts = new Date().toLocaleTimeString('pt-BR', {
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  }
 
-      setMessages((prev) => {
-        const updated = [...prev, message];
-        localStorage.setItem(`chatMessages_${selectedContact.id}`, JSON.stringify(updated));
-        return updated;
-      });
-    },
+  setMessages(prev => {
+    // Check if this message already exists (by ID or content)
+    const messageExists = prev.some(
+      m => m.id === msg.id || (m.text === text && m.time === ts)
+    );
     
-  );
+    if (messageExists) {
+      return prev; // Skip if message already exists
+    }
+
+    const message = {
+      id: msg.id || `temp-${Date.now()}`,
+      text,
+      sender: isFromMe ? 'me' : 'them',
+      time: ts
+    };
+
+    const updated = [...prev, message];
+    localStorage.setItem(`chatMessages_${selectedContact.id}`, JSON.stringify(updated));
+    return updated;
+  });
+}, [selectedContact]);
   const getUserId = () => {
     try {
       const userData = localStorage.getItem('user');
@@ -180,8 +191,14 @@ const createNewChat = async (contact) => {
       console.error('Usuário não autenticado');
       return null;
     }
+
+    // Get the contact's ID, handling different possible ID fields
+    const contactId = contact.id_user ?? contact.id;
     
-    const response = await createChat(currentUserId, contact.id_user ?? contact.id);
+    // Determine the correct order of user IDs
+    // Assuming the doctor is the current user and should be user1
+    const response = await createChat(contactId, currentUserId);
+    
     if (!response?.success) {
       console.error('Falha ao criar chat:', response?.error ?? response);
       return null;
@@ -193,7 +210,7 @@ const createNewChat = async (contact) => {
       return null;
     }
 
-    // Atualiza o mapeamento com a chave normalizada
+    // Update the mapping with the normalized key
     const key = getContactKey(contact);
     const map = { ...chatIdByContact, [key]: String(chatId) };
     setChatIdByContact(map);
@@ -304,47 +321,86 @@ const selectContact = async (contact) => {
   // Obter ID do usuário logado
   
   // Enviar mensagem
-  const sendMessage = async () => {
-    if (!newMessage.trim() || !selectedContact) return;
+const sendMessage = async () => {
+  if (!newMessage.trim() || !selectedContact) return;
 
-    const userId = getUserId();
-    if (!userId) {
-      setError('Usuário não autenticado');
-      return;
-    }
+  const userId = getUserId();
+  if (!userId) {
+    setError('Usuário não autenticado');
+    return;
+  }
 
-    const chatId = selectedContact.chatId || chatIdByContact[selectedContact.id];
-    if (!chatId) {
-      setError('ID do chat não encontrado');
-      return;
-    }
+  const chatId = selectedContact.chatId || chatIdByContact[selectedContact.id];
+  if (!chatId) {
+    setError('ID do chat não encontrado');
+    return;
+  }
 
-    try {
-      // Criar o objeto da mensagem
-      const messageData = {
-        id_chat: parseInt(chatId),
-        conteudo: newMessage.trim(),
-        id_user: parseInt(userId),
-        created_at: new Date().toISOString()
-      };
-
-      // Enviar mensagem para o servidor
-      const response = await sendMessageService(chatId, messageData);
-
-      if (!response.success) {
-        throw new Error(response.error || 'Falha ao enviar mensagem');
-      }
-
-      // Enviar mensagem via socket
-      socketRef.current.emit('SendMessage', messageData);
-      
-      // Limpar o campo de mensagem
-      setNewMessage('');
-    } catch (err) {
-      console.error('Erro ao enviar mensagem:', err);
-      setError('Erro ao enviar mensagem. Tente novamente.');
-    }
+  // Create the message object
+  const messageData = {
+    id_chat: parseInt(chatId),
+    conteudo: newMessage.trim(),
+    id_user: parseInt(userId),
+    created_at: new Date().toISOString()
   };
+
+  // Create a temporary message ID for optimistic update
+  const tempId = Date.now().toString();
+  const tempMessage = {
+    id: tempId,
+    text: messageData.conteudo,
+    sender: 'me',
+    time: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+    isTemp: true // Mark as temporary
+  };
+
+  // Optimistically add the message to the UI
+  setMessages(prev => {
+    const updated = [...prev, tempMessage];
+    localStorage.setItem(`chatMessages_${selectedContact.id}`, JSON.stringify(updated));
+    return updated;
+  });
+
+  // Clear the input immediately
+  setNewMessage('');
+
+  try {
+    // Send message to server
+    const response = await sendMessageService(chatId, messageData);
+
+    if (!response.success) {
+      throw new Error(response.error || 'Falha ao enviar mensagem');
+    }
+
+    // Send message via socket
+    socketRef.current.emit('SendMessage', {
+      ...messageData,
+      id: response.data?.id || tempId, // Use server-generated ID if available
+      isTemp: false
+    });
+
+    // Update the message in the list with server data if needed
+    if (response.data?.id) {
+      setMessages(prev => {
+        const updated = prev.map(msg => 
+          msg.id === tempId ? { ...msg, id: response.data.id, isTemp: false } : msg
+        );
+        localStorage.setItem(`chatMessages_${selectedContact.id}`, JSON.stringify(updated));
+        return updated;
+      });
+    }
+  } catch (err) {
+    console.error('Erro ao enviar mensagem:', err);
+    setError('Erro ao enviar mensagem. Tente novamente.');
+    
+    // Remove the temporary message if there was an error
+    setMessages(prev => {
+      const updated = prev.filter(msg => msg.id !== tempId);
+      localStorage.setItem(`chatMessages_${selectedContact.id}`, JSON.stringify(updated));
+      return updated;
+    });
+  }
+};
 
   // Efeito para buscar médicos quando o termo de busca mudar
   useEffect(() => {
