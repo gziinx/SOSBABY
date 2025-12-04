@@ -254,7 +254,7 @@
 }
 
 .rotina-form {
-  background: white;
+  background: #F2EFFD;
   border-radius: 20px;
   padding: 30px;
   max-width: 400px;
@@ -262,31 +262,48 @@
   max-height: 90vh;
   overflow-y: auto;
   animation: slideUp 0.3s ease-out;
+  border: 2px solid #708EF1;
+  box-shadow: 0 4px 15px rgba(112, 142, 241, 0.3);
 }
 
 .rotina-form h2 {
-  color: #333;
-  margin-bottom: 20px;
+  color: #708EF1;
+  margin: 20px 0;
   text-align: center;
-  font-size: 22px;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.rotina-form::before {
+  content: '';
+  display: block;
+  width: 120px;
+  height: 120px;
+  background-image: url('../../../assets/icons/baby-icon.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  margin: -80px auto 10px;
 }
 
 .rotina-form input,
 .rotina-form textarea {
   width: 100%;
   padding: 12px 15px;
-  border: 2px solid #e0e0e0;
+  border: 2px solid #d0d0d0;
   border-radius: 10px;
   margin-bottom: 15px;
   font-size: 16px;
-  transition: border-color 0.3s ease;
+  transition: all 0.3s ease;
   box-sizing: border-box;
+  background-color: white;
 }
 
 .rotina-form input:focus,
 .rotina-form textarea:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: #708EF1;
+  box-shadow: 0 0 0 3px rgba(112, 142, 241, 0.2);
 }
 
 .rotina-form textarea {
@@ -320,18 +337,19 @@
 }
 
 .form-buttons button {
-  padding: 12px 20px;
-  border: none;
+  padding: 12px 25px;
   border-radius: 10px;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
 .form-buttons button[type="button"] {
-  background: #f0f0f0;
-  color: #666;
+  background: #d1d1d1;
+  color: #333;
+  border: 1px solid #999;
 }
 
 .form-buttons button[type="button"]:hover {
@@ -339,13 +357,15 @@
 }
 
 .form-buttons button[type="submit"] {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #708EF1;
   color: white;
+  border: none;
 }
 
 .form-buttons button[type="submit"]:hover:not(:disabled) {
   transform: translateY(-1px);
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 4px 15px rgba(112, 142, 241, 0.5);
+  background: #5d7ae0;
 }
 
 .form-buttons button:disabled {

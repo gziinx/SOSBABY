@@ -7,6 +7,9 @@ import homeLeft from '../../assets/homeleft.png';
 import { useNavigate } from 'react-router-dom';
 import senai from '../../assets/senai.png';
 import ChatComIA from '../chatcomia/chatcomia';
+import botIcon from '../../assets/Bot.png';
+import chatIcon from '../../assets/Chat.png';
+import documentIcon from '../../assets/Document.png';
 
 function getUserIdFromToken() {
   try {
@@ -363,17 +366,23 @@ export default function Home() {
             <div className="service" onClick={() => {
               document.querySelector('.chat-ia-section')?.scrollIntoView({ behavior: 'smooth' });
             }} style={{ cursor: 'pointer' }}>
-              <div className="service-icon">🤖</div>
+              <div className="service-icon">
+                <img src={botIcon} alt="Bot" style={{ width: '60px', height: '60px' }} />
+              </div>
               <h3>AI</h3>
               <p>Somos uma time que auxilia pais de primeira viagem e pai mais solo.</p>
             </div>
             <div className="service" onClick={handleChat} style={{ cursor: 'pointer' }}>
-              <div className="service-icon">💬</div>
+              <div className="service-icon">
+                <img src={chatIcon} alt="Chat" style={{ width: '60px', height: '60px' }} />
+              </div>
               <h3>Chat com médico</h3>
               <p>Funcionalidade com uma plataforma aferideelat</p>
             </div>
             <div className="service" onClick={handleRotina} style={{ cursor: 'pointer' }}>
-              <div className="service-icon">📋</div>
+              <div className="service-icon">
+                <img src={documentIcon} alt="Documento" style={{ width: '60px', height: '60px' }} />
+              </div>
               <h3>Rotina</h3>
               <p>Acompanhe e gerencie as rotinas do seu bebê</p>
             </div>
@@ -421,45 +430,47 @@ export default function Home() {
 
         {/* Routine */}
         <section className="routine-section">
-          <h2>Rotina do dia</h2>
-          {apiStatus === 'loading' ? (
-            <div className="routine-loading">Carregando rotina...</div>
-          ) : apiStatus === 'error' ? (
-            <div className="routine-error">
-              <p>Não foi possível carregar as rotinas. Tente novamente mais tarde.</p>
-              <button className="btn" onClick={fetchRotinas}>Tentar novamente</button>
-            </div>
-          ) : rotinas.length > 0 ? (
-            <div className="routine">
-              <div className="routine-tasks">
-                {rotinas.map((rotina, index) => {
-                  // Formata a hora para exibição
-                  const horaFormatada = rotina.hora ? 
-                    rotina.hora.includes('T') ? 
-                      new Date(rotina.hora).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : 
-                      rotina.hora : 
-                    '--:--';
-                  
-                  return (
-                    <div key={index} className="task" style={{ borderLeft: `4px solid ${rotina.cor || '#6366f1'}` }}>
-                      <div className="task-dot" style={{ backgroundColor: rotina.cor || '#6366f1' }}></div>
-                      <div className="task-info">
-                        <span className="task-title">{rotina.titulo_rotina || rotina.titulo || 'Sem título'}</span>
-                        {rotina.descricao && <span className="task-desc">{rotina.descricao}</span>}
-                      </div>
-                      <span className="task-time">{horaFormatada}</span>
-                    </div>
-                  );
-                })}
-                <button className="btn" onClick={() => navigate('/rotina')}>Ver rotina completa</button>
+          <div className="routine-container">
+            <h2>Rotina do dia</h2>
+            {apiStatus === 'loading' ? (
+              <div className="routine-loading">Carregando rotina...</div>
+            ) : apiStatus === 'error' ? (
+              <div className="routine-error">
+                <p>Não foi possível carregar as rotinas. Tente novamente mais tarde.</p>
+                <button className="btn" onClick={fetchRotinas}>Tentar novamente</button>
               </div>
-            </div>
-          ) : (
-            <div className="no-routine">
-              <p>Você ainda não tem uma rotina cadastrada.</p>
-              <button className="btn" onClick={() => navigate('/rotina')}>Criar rotina</button>
-            </div>
-          )}
+            ) : rotinas.length > 0 ? (
+              <div className="routine">
+                <div className="routine-tasks">
+                  {rotinas.map((rotina, index) => {
+                    // Formata a hora para exibição
+                    const horaFormatada = rotina.hora ? 
+                      rotina.hora.includes('T') ? 
+                        new Date(rotina.hora).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : 
+                        rotina.hora : 
+                      '--:--';
+                    
+                    return (
+                      <div key={index} className="task" style={{ borderLeft: `4px solid ${rotina.cor || '#6366f1'}` }}>
+                        <div className="task-dot" style={{ backgroundColor: rotina.cor || '#6366f1' }}></div>
+                        <div className="task-info">
+                          <span className="task-title">{rotina.titulo_rotina || rotina.titulo || 'Sem título'}</span>
+                          {rotina.descricao && <span className="task-desc">{rotina.descricao}</span>}
+                        </div>
+                        <span className="task-time">{horaFormatada}</span>
+                      </div>
+                    );
+                  })}
+                  <button className="btn" onClick={() => navigate('/rotina')}>Ver rotina completa</button>
+                </div>
+              </div>
+            ) : (
+              <div className="no-routine">
+                <p>Você ainda não tem uma rotina cadastrada.</p>
+                <button className="btn" onClick={() => navigate('/rotina')}>Criar rotina</button>
+              </div>
+            )}
+          </div>
         </section>
 
         {/* Chat IA */}
